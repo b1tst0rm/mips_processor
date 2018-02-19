@@ -14,6 +14,14 @@ Model Technology ModelSim PE Student Edition vcom 10.4a Compiler 2015.03 Apr  7 
 -- Compiling entity and2
 -- Compiling architecture dataflow of and2
 
+} {} {}} C:/Users/IEUser/Documents/cpre381_project/part1/barrel_shift.vhd {1 {vcom -work work -2002 -explicit -stats=none C:/Users/IEUser/Documents/cpre381_project/part1/barrel_shift.vhd
+Model Technology ModelSim PE Student Edition vcom 10.4a Compiler 2015.03 Apr  7 2015
+-- Loading package STANDARD
+-- Loading package TEXTIO
+-- Loading package std_logic_1164
+-- Compiling entity barrel_shifter
+-- Compiling architecture structure of barrel_shifter
+
 } {} {}} C:/Users/IEUser/Documents/cpre381_project/assets/mux2-1.vhd {1 {vcom -work work -2002 -explicit -stats=none C:/Users/IEUser/Documents/cpre381_project/assets/mux2-1.vhd
 Model Technology ModelSim PE Student Edition vcom 10.4a Compiler 2015.03 Apr  7 2015
 -- Loading package STANDARD

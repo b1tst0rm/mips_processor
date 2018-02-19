@@ -33,7 +33,7 @@ entity barrel_shifter is
     port( i_data   : in std_logic_vector(31 downto 0);
           o_data   : out std_logic_vector(31 downto 0);
           i_type   : in std_logic; -- 0 = logical, 1 = arithmetic
-          i_dir    : in std_logic; -- 0 = left, 1 = right
+          i_dir    : in std_logic; -- 0 = right, 1 = left
           i_shamt  : in std_logic_vector(4 downto 0) ); -- shift amount
 end barrel_shifter;
 
@@ -47,10 +47,24 @@ architecture structure of barrel_shifter is
               o_OUT : out std_logic );
     end component;
 
-    signal mux_out_1, mux_out_2, mux_out_3, mux_out_4 : std_logic_vector(31 downto 0);
+    signal s_data, mux_out_1, mux_out_2, mux_out_3, mux_out_4 : std_logic_vector(31 downto 0);
     signal s_shift_bit : std_logic;
 
 begin
+    process (i_dir)
+    begin
+        if (i_dir = '1') then
+            -- if the direction is set to left, we need to reverse order of bits in i_data
+            for i in 0 to 31 loop
+                s_data(i) <= i_data(31 - i);
+            end loop;
+        else
+            -- otherwise keep the ingress data the same
+            s_data <= i_data;
+        end if;
+    end process;
+
+
     -- we must define the type of bit to shift in dependent on the shift type
     with i_type select s_shift_bit <=
         i_data(31) when '1', -- for an arithmetic shift, shift in the MSB
@@ -67,7 +81,7 @@ begin
         GEN_SHIFT_IN: if (i > 30) generate
             tmp_mux_i: mux_2_1_struct_single
                 -- if i_shamt(0) = '1', this would be a one bit shift
-                port map(i_data(i), s_shift_bit, i_shamt(0), mux_out_1(i));
+                port map(s_data(i), s_shift_bit, i_shamt(0), mux_out_1(i));
         end generate GEN_SHIFT_IN;
 
         GEN_MAIN: if (i <= 30) generate
