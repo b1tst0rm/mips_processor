@@ -8,3 +8,258 @@ z2
 !i10f 100
 cModel Technology
 dC:/Users/IEUser/Documents/cpre_381_lab4/P3
+Eand2
+Z0 w1518048810
+Z1 DPx3 std 6 textio 0 22 zE1`LPoLg^DX3Oz^4Fj1K3
+Z2 DPx4 ieee 14 std_logic_1164 0 22 eNV`TJ_GofJTzYa?f<@Oe1
+Z3 dC:/Users/IEUser/Documents/cpre381_project/part1
+Z4 8C:/Users/IEUser/Documents/cpre381_project/assets/and2.vhd
+Z5 FC:/Users/IEUser/Documents/cpre381_project/assets/and2.vhd
+l0
+L21
+V1JVoXJP[Q;1L<[V@;05XT3
+!s100 JZf04olJSzIgd<=D<MAkE3
+Z6 OP;C;10.4a;61
+32
+Z7 !s110 1519077072
+!i10b 1
+Z8 !s108 1519077072.000000
+Z9 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/IEUser/Documents/cpre381_project/assets/and2.vhd|
+Z10 !s107 C:/Users/IEUser/Documents/cpre381_project/assets/and2.vhd|
+!i113 1
+Z11 o-work work -2002 -explicit -O0
+Z12 tExplicit 1
+Adataflow
+R1
+R2
+DEx4 work 4 and2 0 22 1JVoXJP[Q;1L<[V@;05XT3
+l30
+L29
+Vel9VK[A=jHkMZCn9NM?0N0
+!s100 W@O^9l?GM@a9b0LOgTaDA0
+R6
+32
+R7
+!i10b 1
+R8
+R9
+R10
+!i113 1
+R11
+R12
+Ebarrel_shifter
+Z13 w1519077025
+R1
+R2
+R3
+Z14 8C:/Users/IEUser/Documents/cpre381_project/part1/barrel_shift.vhd
+Z15 FC:/Users/IEUser/Documents/cpre381_project/part1/barrel_shift.vhd
+l0
+L32
+V@1jdh6Ncj1Em^?E_dzN`F0
+!s100 LDDVZ?2mI3J_6ilDhb><32
+R6
+32
+R7
+!i10b 1
+R8
+Z16 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/IEUser/Documents/cpre381_project/part1/barrel_shift.vhd|
+Z17 !s107 C:/Users/IEUser/Documents/cpre381_project/part1/barrel_shift.vhd|
+!i113 1
+R11
+R12
+Astructure
+R1
+R2
+DEx4 work 14 barrel_shifter 0 22 @1jdh6Ncj1Em^?E_dzN`F0
+l53
+L41
+VS0h2cT[cM_ZeE_afLLX]31
+!s100 W0cNYnffJlO=U?VjcO?PW2
+R6
+32
+R7
+!i10b 1
+R8
+R16
+R17
+!i113 1
+R11
+R12
+Einv
+R0
+R1
+R2
+R3
+Z18 8C:/Users/IEUser/Documents/cpre381_project/assets/inv.vhd
+Z19 FC:/Users/IEUser/Documents/cpre381_project/assets/inv.vhd
+l0
+L10
+VD6Qfg<3kjlDLKN2Lc`E:90
+!s100 BQQgn0XBS=C>QSmlX>UiX2
+R6
+32
+R7
+!i10b 1
+R8
+Z20 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/IEUser/Documents/cpre381_project/assets/inv.vhd|
+Z21 !s107 C:/Users/IEUser/Documents/cpre381_project/assets/inv.vhd|
+!i113 1
+R11
+R12
+Adataflow
+R1
+R2
+DEx4 work 3 inv 0 22 D6Qfg<3kjlDLKN2Lc`E:90
+l18
+L17
+VGB5IB4C2:<CLLjQ0CQQkU1
+!s100 GWi;T63m360MRQnn8UJX81
+R6
+32
+R7
+!i10b 1
+R8
+R20
+R21
+!i113 1
+R11
+R12
+Emux_2_1_struct
+R0
+R1
+R2
+R3
+Z22 8C:/Users/IEUser/Documents/cpre381_project/assets/mux2-1_Nbit_structural.vhd
+Z23 FC:/Users/IEUser/Documents/cpre381_project/assets/mux2-1_Nbit_structural.vhd
+l0
+L12
+VEUG1kM:`]I:dN0UHecKle1
+!s100 ?G<gc=W;zEMQna4R=ai120
+R6
+32
+Z24 !s110 1519075319
+!i10b 1
+Z25 !s108 1519075319.000000
+Z26 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/IEUser/Documents/cpre381_project/assets/mux2-1_Nbit_structural.vhd|
+Z27 !s107 C:/Users/IEUser/Documents/cpre381_project/assets/mux2-1_Nbit_structural.vhd|
+!i113 1
+R11
+R12
+Astructure
+R1
+R2
+DEx4 work 14 mux_2_1_struct 0 22 EUG1kM:`]I:dN0UHecKle1
+l43
+L21
+VeHPC_mN^OFVg[4z]?L;oc0
+!s100 QcG>3HcCBW]Yo2l_AkP1b1
+R6
+32
+R24
+!i10b 1
+R25
+R26
+R27
+!i113 1
+R11
+R12
+Emux_2_1_struct_single
+R0
+R1
+R2
+R3
+Z28 8C:/Users/IEUser/Documents/cpre381_project/assets/mux2-1.vhd
+Z29 FC:/Users/IEUser/Documents/cpre381_project/assets/mux2-1.vhd
+l0
+L12
+V[=j=ZgF:zI82gFoBRgD3o3
+!s100 3k[@;zR`lg?7D>n3KjJW63
+R6
+32
+R7
+!i10b 1
+R8
+Z30 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/IEUser/Documents/cpre381_project/assets/mux2-1.vhd|
+Z31 !s107 C:/Users/IEUser/Documents/cpre381_project/assets/mux2-1.vhd|
+!i113 1
+R11
+R12
+Astructure
+R1
+R2
+Z32 DEx4 work 21 mux_2_1_struct_single 0 22 [=j=ZgF:zI82gFoBRgD3o3
+l41
+L20
+Z33 VKziCYI[[f18OMHDen]MFf2
+Z34 !s100 6cHVhBehczEf>Z4[?Q12[0
+R6
+32
+R7
+!i10b 1
+R8
+R30
+R31
+!i113 1
+R11
+R12
+Eor2
+R0
+R1
+R2
+R3
+Z35 8C:/Users/IEUser/Documents/cpre381_project/assets/or2.vhd
+Z36 FC:/Users/IEUser/Documents/cpre381_project/assets/or2.vhd
+l0
+L21
+V4;0XhFZgndCelCd:i@[e93
+!s100 3VA0nme1?BLCenDET9YVz1
+R6
+32
+R7
+!i10b 1
+R8
+Z37 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/IEUser/Documents/cpre381_project/assets/or2.vhd|
+Z38 !s107 C:/Users/IEUser/Documents/cpre381_project/assets/or2.vhd|
+!i113 1
+R11
+R12
+Adataflow
+R1
+R2
+DEx4 work 3 or2 0 22 4;0XhFZgndCelCd:i@[e93
+l30
+L29
+Vf5=OAI@RFJU3`VfSHW0hG3
+!s100 [6jMc:Y7h]cdRoID5_J[j3
+R6
+32
+R7
+!i10b 1
+R8
+R37
+R38
+!i113 1
+R11
+R12
+Etb_barrel_shift
+w1519076672
+R1
+R2
+R3
+8C:/Users/IEUser/Documents/cpre381_project/part1/tb_barrel_shift.vhd
+FC:/Users/IEUser/Documents/cpre381_project/part1/tb_barrel_shift.vhd
+l0
+L12
+V9YD5LiLg5Kg=J@EGkE?LK2
+!s100 KHI?XR6zzKN9<P?DU9zL@1
+R6
+32
+Z39 !s110 1519076978
+!i10b 1
+Z40 !s108 1519076978.000000
+!s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/IEUser/Documents/cpre381_project/part1/tb_barrel_shift.vhd|
+!s107 C:/Users/IEUser/Documents/cpre381_project/part1/tb_barrel_shift.vhd|
+!i113 1
+R11
+R12
