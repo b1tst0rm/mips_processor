@@ -21,9 +21,9 @@ V1JVoXJP[Q;1L<[V@;05XT3
 !s100 JZf04olJSzIgd<=D<MAkE3
 Z6 OP;C;10.4a;61
 32
-Z7 !s110 1519079452
+Z7 !s110 1519100320
 !i10b 1
-Z8 !s108 1519079452.000000
+Z8 !s108 1519100320.000000
 Z9 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/IEUser/Documents/cpre381_project/assets/and2.vhd|
 Z10 !s107 C:/Users/IEUser/Documents/cpre381_project/assets/and2.vhd|
 !i113 1
@@ -48,16 +48,16 @@ R10
 R11
 R12
 Ebarrel_shifter
-Z13 w1519079446
+Z13 w1519100288
 R1
 R2
 R3
 Z14 8C:/Users/IEUser/Documents/cpre381_project/part1/barrel_shift.vhd
 Z15 FC:/Users/IEUser/Documents/cpre381_project/part1/barrel_shift.vhd
 l0
-L32
-V@1jdh6Ncj1Em^?E_dzN`F0
-!s100 LDDVZ?2mI3J_6ilDhb><32
+L24
+V>]0oXTM3_z6;nIaSFKSa>1
+!s100 H0jEWF<i?J]naiNJi>kOY0
 R6
 32
 R7
@@ -71,11 +71,11 @@ R12
 Astructure
 R1
 R2
-DEx4 work 14 barrel_shifter 0 22 @1jdh6Ncj1Em^?E_dzN`F0
-l53
-L41
-VYY@2e1KMW_5bMnTCceFa12
-!s100 i]U>DKh4f083D_TUT1j>j3
+DEx4 work 14 barrel_shifter 0 22 >]0oXTM3_z6;nIaSFKSa>1
+l59
+L33
+VJQaO=9idCd?A5eRkJd7:h1
+!s100 ;B3>h9<=TE5E@h6I8ZcGO2
 R6
 32
 R7
@@ -177,29 +177,29 @@ V[=j=ZgF:zI82gFoBRgD3o3
 !s100 3k[@;zR`lg?7D>n3KjJW63
 R6
 32
-Z30 !s110 1519079453
+R7
 !i10b 1
-Z31 !s108 1519079453.000000
-Z32 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/IEUser/Documents/cpre381_project/assets/mux2-1.vhd|
-Z33 !s107 C:/Users/IEUser/Documents/cpre381_project/assets/mux2-1.vhd|
+R8
+Z30 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/IEUser/Documents/cpre381_project/assets/mux2-1.vhd|
+Z31 !s107 C:/Users/IEUser/Documents/cpre381_project/assets/mux2-1.vhd|
 !i113 1
 R11
 R12
 Astructure
 R1
 R2
-Z34 DEx4 work 21 mux_2_1_struct_single 0 22 [=j=ZgF:zI82gFoBRgD3o3
+DEx4 work 21 mux_2_1_struct_single 0 22 [=j=ZgF:zI82gFoBRgD3o3
 l41
 L20
-Z35 VKziCYI[[f18OMHDen]MFf2
-Z36 !s100 6cHVhBehczEf>Z4[?Q12[0
+VKziCYI[[f18OMHDen]MFf2
+!s100 6cHVhBehczEf>Z4[?Q12[0
 R6
 32
-R30
+R7
 !i10b 1
+R8
+R30
 R31
-R32
-R33
 !i113 1
 R11
 R12
@@ -208,8 +208,8 @@ R0
 R1
 R2
 R3
-Z37 8C:/Users/IEUser/Documents/cpre381_project/assets/or2.vhd
-Z38 FC:/Users/IEUser/Documents/cpre381_project/assets/or2.vhd
+Z32 8C:/Users/IEUser/Documents/cpre381_project/assets/or2.vhd
+Z33 FC:/Users/IEUser/Documents/cpre381_project/assets/or2.vhd
 l0
 L21
 V4;0XhFZgndCelCd:i@[e93
@@ -219,8 +219,8 @@ R6
 R7
 !i10b 1
 R8
-Z39 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/IEUser/Documents/cpre381_project/assets/or2.vhd|
-Z40 !s107 C:/Users/IEUser/Documents/cpre381_project/assets/or2.vhd|
+Z34 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/IEUser/Documents/cpre381_project/assets/or2.vhd|
+Z35 !s107 C:/Users/IEUser/Documents/cpre381_project/assets/or2.vhd|
 !i113 1
 R11
 R12
@@ -232,6 +232,45 @@ l30
 L29
 Vf5=OAI@RFJU3`VfSHW0hG3
 !s100 [6jMc:Y7h]cdRoID5_J[j3
+R6
+32
+R7
+!i10b 1
+R8
+R34
+R35
+!i113 1
+R11
+R12
+Ereverse_order
+Z36 w1519097703
+R1
+R2
+R3
+Z37 8C:/Users/IEUser/Documents/cpre381_project/part1/reverse_order.vhd
+Z38 FC:/Users/IEUser/Documents/cpre381_project/part1/reverse_order.vhd
+l0
+L13
+VaGTlXTgWA`D[Ik;]afUg@3
+!s100 F2<]J;TV9;=EdmQnD?@B40
+R6
+32
+R7
+!i10b 1
+R8
+Z39 !s90 -reportprogress|300|-work|work|-2002|-explicit|-stats=none|C:/Users/IEUser/Documents/cpre381_project/part1/reverse_order.vhd|
+Z40 !s107 C:/Users/IEUser/Documents/cpre381_project/part1/reverse_order.vhd|
+!i113 1
+R11
+R12
+Astructure
+R1
+R2
+Z41 DEx4 work 13 reverse_order 0 22 aGTlXTgWA`D[Ik;]afUg@3
+l20
+L19
+Z42 V_PzBIo<5SaLX_2;dAglWL2
+Z43 !s100 Ac:z<;[z]FIO[5a5:MM0h1
 R6
 32
 R7

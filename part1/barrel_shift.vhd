@@ -18,14 +18,6 @@
 -- An arithmetic right shift simply shifts the bits by shamt and shifts in from the left
 -- 1's so as to preserve the sign bit
 
-
--- To shift left, implement a 2-1 mux (with i_dir as the selector) that selects
--- between normal input and a flip module. Flip module should flip all bits on
--- the input std_logic_vector.
-
--- THIS IS A RIGHT SHIFTER ONLY AT THE MOMENT
-
-
 library IEEE;
 use IEEE.std_logic_1164.all;
 
@@ -47,31 +39,36 @@ architecture structure of barrel_shifter is
               o_OUT : out std_logic );
     end component;
 
-    signal s_data, mux_out_1, mux_out_2, mux_out_3, mux_out_4 : std_logic_vector(31 downto 0);
+    component mux_2_1_struct is
+        generic(N : integer := 32);
+        port( i_X   : in std_logic_vector(N-1 downto 0);
+              i_Y   : in std_logic_vector(N-1 downto 0);
+              i_SEL : in std_logic;
+              o_OUT   : out std_logic_vector(N-1 downto 0) );
+    end component;
+
+
+    component reverse_order is
+        port( i_data   : in std_logic_vector(31 downto 0);
+              o_data   : out std_logic_vector(31 downto 0) );
+    end component;
+
+    signal s_out, s_fin_reverse, s_reversed, s_data, mux_out_1, mux_out_2, mux_out_3, mux_out_4 : std_logic_vector(31 downto 0);
     signal s_shift_bit : std_logic;
 
 begin
-    process (i_dir)
-    begin
-        if (i_dir = '1') then
-            -- if the direction is set to left, we need to reverse order of bits in i_data
-            for i in 0 to 31 loop
-                s_data(i) <= i_data(31 - i);
-            end loop;
-        else
-            -- otherwise keep the ingress data the same
-            s_data <= i_data;
-        end if;
-    end process;
+    REVERSE: reverse_order
+        port map (i_data, s_reversed);
 
+    -- flip bits if necessary (for left shifts)
+    ORGANIZE_BITS_BEFORE: mux_2_1_struct
+        port map (i_data, s_reversed, i_dir, s_data);
 
     -- we must define the type of bit to shift in dependent on the shift type
     with i_type select s_shift_bit <=
         i_data(31) when '1', -- for an arithmetic shift, shift in the MSB
         '0' when '0',        -- logical shift always shifts in 0
         '0' when others;     -- all other possibilities (compiler complains otherwise)
-
-    -- IMPLEMENT LEFT SHIFTING PART HERE WITH A MUX! SEE ABOVE!
 
     -- set up the multiplexers using five for loops, one for each cascade level
 
@@ -86,7 +83,7 @@ begin
 
         GEN_MAIN: if (i <= 30) generate
             tmp_mux_i: mux_2_1_struct_single
-                port map(i_data(i), i_data(i + 1), i_shamt(0), mux_out_1(i));
+                port map(s_data(i), s_data(i + 1), i_shamt(0), mux_out_1(i));
         end generate GEN_MAIN;
     end generate;
 
@@ -137,15 +134,20 @@ begin
     begin
         GEN_SHIFT_IN: if (i > 15) generate
             tmp_mux_i: mux_2_1_struct_single
-                port map(mux_out_4(i), s_shift_bit, i_shamt(4), o_data(i));
+                port map(mux_out_4(i), s_shift_bit, i_shamt(4), s_out(i));
         end generate GEN_SHIFT_IN;
 
         GEN_MAIN: if (i <= 15) generate
             tmp_mux_i: mux_2_1_struct_single
-                port map(mux_out_4(i), mux_out_4(i + 16), i_shamt(4), o_data(i));
+                port map(mux_out_4(i), mux_out_4(i + 16), i_shamt(4), s_out(i));
         end generate GEN_MAIN;
     end generate;
 
+    -- if necessary, reverse order one more time (in case of left shift)
+    REVERSE_FIN: reverse_order
+        port map (s_out, s_fin_reverse);
 
+    ORGANIZE_BITS_AFTER: mux_2_1_struct
+        port map (s_out, s_fin_reverse, i_dir, o_data);
 
 end structure;
