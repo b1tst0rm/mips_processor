@@ -1,4 +1,4 @@
--- and32.vhd
+-- and_32.vhd
 -------------------------------------------------------------------------
 -- DESCRIPTION: This file contains a 32 bit AND gate.
 
