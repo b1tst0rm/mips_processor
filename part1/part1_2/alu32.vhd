@@ -92,19 +92,16 @@ architecture structure of alu32 is
     end component;
 
     component zero_detect is
-        port( i_mux0   : in  std_logic_vector(31 downto 0);
-              i_mux1   : in  std_logic_vector(31 downto 0);
-              i_mux2   : in  std_logic_vector(31 downto 0);
-              i_mux3   : in  std_logic_vector(31 downto 0);
-              i_mux4   : in  std_logic_vector(31 downto 0);
-              i_mux5   : in  std_logic_vector(31 downto 0);
-              i_mux6   : in  std_logic_vector(31 downto 0);
-              o_Zero   : out std_logic ); -- The zero flag result
+        port( i_F    : in  std_logic_vector(31 downto 0); -- result selected from mux
+              o_Zero : out std_logic ); -- The zero flag result
     end component;
+
 
     -- Intermediate signals fed into 7-1 ALUOP mux
     signal mux0_in, mux1_in, mux2_in, mux3_in, mux4_in, mux5_in, mux6_in
         : std_logic_vector(31 downto 0);
+
+    signal s_F : std_logic_vector(31 downto 0); -- intermediate result signal
 
     signal s_ovf, s_zero, s_carry : std_logic; -- intermediate flag signals
 
@@ -136,15 +133,16 @@ begin
     XOR_OP: xor_32
         port map (i_A, i_B, mux6_in);
 
-    -- Calculate the zero flag
-    ZERO_FLAG: zero_detect
-        port map(mux0_in, mux1_in, mux2_in, mux3_in, mux4_in, mux5_in, mux6_in, s_zero);
-
     SELECT_OPERATION: mux_7to1
         port map (i_ALUOP, mux0_in, mux1_in, mux2_in, mux3_in, mux4_in, mux5_in, mux6_in,
-            o_F);
+            s_F);
 
-    -- set the final flag values
+    -- Calculate the zero flag
+    ZERO_FLAG: zero_detect
+        port map(s_F, s_zero);
+
+    -- set the final outputted values
+    o_F <= s_F;
     o_Overflow <= s_ovf;
     o_Zero <= s_zero;
     o_CarryOut <= s_carry;
