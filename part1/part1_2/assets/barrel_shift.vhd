@@ -23,10 +23,10 @@ use IEEE.std_logic_1164.all;
 
 entity barrel_shifter is
     port( i_data   : in std_logic_vector(31 downto 0);
-          o_data   : out std_logic_vector(31 downto 0);
           i_type   : in std_logic; -- 0 = logical, 1 = arithmetic
           i_dir    : in std_logic; -- 0 = right, 1 = left
-          i_shamt  : in std_logic_vector(4 downto 0) ); -- shift amount
+          i_shamt  : in std_logic_vector(4 downto 0); -- shift amount
+          o_data   : out std_logic_vector(31 downto 0) );
 end barrel_shifter;
 
 --- Define the architecture ---

@@ -1,6 +1,6 @@
 -- addsub_Nbit_structural.vhd
 -------------------------------------------------------------------------
--- DESCRIPTION: N-bit adder/subtractor w/ control implementation using 
+-- DESCRIPTION: N-bit adder/subtractor w/ control implementation using
 -- structural VHDL
 
 -- Perfoms A + B when i_nAdd_Sub = 0
@@ -16,7 +16,7 @@ entity addsub_struct_nbit is
     generic(N : integer := 4);
     port( i_A         : in std_logic_vector(N-1 downto 0);
           i_B         : in std_logic_vector(N-1 downto 0);
-          i_nAdd_Sub  : in std_logic; 
+          i_nAdd_Sub  : in std_logic; -- A+B when = '0', A-B when = '1'
           o_Cout      : out std_logic;
           o_S         : out std_logic_vector(N-1 downto 0) );
 end addsub_struct_nbit;
@@ -42,7 +42,7 @@ architecture structure of addsub_struct_nbit is
         generic(N : integer := 32);
         port( i_A    : in std_logic_vector(N-1 downto 0);
               i_B    : in std_logic_vector(N-1 downto 0);
-              i_Cin  : in std_logic; 
+              i_Cin  : in std_logic;
               o_Cout : out std_logic;
               o_S    : out std_logic_vector(N-1 downto 0) );
     end component;
