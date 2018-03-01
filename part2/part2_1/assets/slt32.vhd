@@ -21,7 +21,9 @@ begin
 -- This occurs in two cases: 1) Overflow flag is set to zero and MSB of the
 --                               subtraction result is 1 (negative)
 --                           2) Overflow flag is set to one (result is negative)
-o_F(0) <= i_SubF(31) when i_OVF = '0' else
-                 '1' when i_OVF = '1';
+-- To account for OVF, we XOR the flag with the MSB of the subtraction output
+-- to see if our arithmetic is "right"...if not, we need to account for this
+o_F(0) <= i_SubF(31) XOR i_OVF;
+
 o_F(31 downto 1) <= (others => '0'); -- set all other bits to '0' always
 end dataflow;
