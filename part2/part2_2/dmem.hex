@@ -1,23 +1,6 @@
-// File Format:
-// 
-// The text file can contain whitespace characters, comments (C-style),
-// and binary ($readmemb) or hexadecimal ($readmemh) data values.  Both
-// types of data values can contain x or X, z or Z, and the underscore
-// character.
-// 
-// The data values are assigned to memory words from left to right,
-// beginning at start_addr or the left array bound (the default).  The
-// next address to load may be specified in the file itself using @hhhhhh, 
-// where h is a hexadecimal character.  Spaces between the @ and the address 
-// character are not allowed.  It shall be an error if there are too many 
-// words in the file or if an address is outside the bounds of the array.
-//
-// 11110000      // Loads at address 0 by default
-// 1010_1111   
-// @2 00001111   
 00000001 // address 0
 00000002
-FFFFFFFD
+00000003
 00000004
 FFFFFFFB
 00000006
@@ -25,7 +8,3 @@ FFFFFFF9
 00000008
 FFFFFFF7
 0000000A // address 9
-
-//@15      // address 0x15 or 21 in decimal
-//0000a000
-//0000b000
