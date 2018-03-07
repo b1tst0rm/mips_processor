@@ -1,3 +1,11 @@
+-- extender5to32.vhd
+-------------------------------------------------------------------------
+-- DESCRIPTION: Extends a 5 bit signal to a 32 bit signal depending on sign
+-- Uses dataflow VHDL.
+
+-- AUTHOR: Daniel Limanowski
+-------------------------------------------------------------------------
+
 library IEEE;
 use IEEE.std_logic_1164.all;
 use ieee.numeric_std.all;
@@ -15,8 +23,8 @@ begin
         output(i) <= input(i);
     end generate;
 
-    G2: for i in 16 to 31 generate
-        output(i) <= sign and input(15);
+    G2: for i in 5 to 31 generate
+        output(i) <= sign and input(4);
     end generate;
 
 end dataflow;
