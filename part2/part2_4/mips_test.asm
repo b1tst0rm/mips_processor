@@ -24,15 +24,15 @@ orTest:
 	xori $3, $1, 0			# 1 XOR 0 = 1, $3 = 1
 
 sltTest:
-	add $1, $zero, 0		# $1 = 0
-	add $2, $zero, 1		# $2 = 1
+	addi $1, $zero, 0		# $1 = 0
+	addi $2, $zero, 1		# $2 = 1
 	slt $3, $1, $2			# $3 = 0 < 1, $3 = 1
 	slti $3, $2, 0			# $3 = 1 < 1, $3 = 0
 	sltiu $3, $zero, 1		# $3 = 0 < 1, $3 = 1
 	sltu $3, $2, $1			# $3 = 1 < 0, $3 = 0
 
 shiftTest:
-	add $1, $zero, 2		# $1 = 2
+	addi $1, $zero, 2		# $1 = 2
 	sll $2, $1, 2 			# $2 = 2 x (2^2) = 8
 	srl $2, $2, 2 			# $2 = 8/4 = 2
 	sra, $2, $2, 1			# $2 = 2 / 2 = 1
@@ -41,9 +41,11 @@ shiftTest:
 	srav $2, $1, $2, 		# $2 = 2/2 = 1
 
 subTest:
-	add $3, $zero, 4		# $3 = 4
+	addi $1, $zero, 2		# $1 = 2
+	addi $2, $zero, 1		# $2 = 1
+	addi $3, $zero, 4		# $3 = 4
 	sub $4, $1, $2			# $4 = 2 - 1 = 1
-	subu $4, $3, $4			# $4 = 4 - 1 = 3
+	subu $4, $3, $2			# $4 = 4 - 1 = 3
 
 loadAndStoreTest:
 	lui $1, 4097 			# 4097 = 1001 hex. The upper 16 bits is stored in $1 - Results in 0x10010000 in hex
