@@ -45,15 +45,30 @@ begin
 
     process -- inside a process all statements are executed sequentially
     begin
+
         ------------- TEST ---------------
-        report "Beginning ADD test";
+        report "Beginning SLT test";
         -- zero out the instruction
         s_in <= std_logic_vector(to_unsigned(0, s_in'length));
 
         wait for 100 ns;
         s_in(31 downto 26) <= "000000";
-        s_in(5 downto 0) <= "100000";
+        s_in(5 downto 0) <= "101010";
 
+        wait for 100 ns;
+
+        assert s_RegDst = '1' report "RegDst incorrect." severity failure;
+        assert s_Mem_To_Reg = '0' report "o_Mem_To_Reg incorrect." severity failure;
+        assert s_ALUOP = "0111" report "ALUOp incorrect." severity failure;
+        assert s_MemWrite = '0' report "MemWrite incorrect." severity failure;
+        assert s_ALUSrc = '0' report "ALUSrc incorrect." severity failure;
+        assert s_RegWrite = '1' report "RegWrite incorrect." severity failure;
+        ------------- END TEST ------------
+
+        ------------- TEST ---------------
+        report "Beginning ADD test";
+        wait for 100 ns;
+        s_in <= "00000001010010110100100000100000";
         wait for 100 ns;
 
         assert s_RegDst = '1' report "RegDst incorrect." severity failure;
@@ -70,10 +85,9 @@ begin
         s_in <= std_logic_vector(to_unsigned(0, s_in'length));
 
         wait for 100 ns;
-        s_in(31 downto 26) <= "001000";
-        s_in(5 downto 0) <= "------";
+        s_in <= "00100000000000000000000000000000";
 
-        wait for 100 ns;
+        wait for 400 ns;
 
         assert s_RegDst = '0' report "RegDst incorrect." severity failure;
         assert s_Mem_To_Reg = '0' report "o_Mem_To_Reg incorrect." severity failure;
@@ -293,25 +307,6 @@ begin
         ------------- END TEST ------------
 
         ------------- TEST ---------------
-        report "Beginning SLT test";
-        -- zero out the instruction
-        s_in <= std_logic_vector(to_unsigned(0, s_in'length));
-
-        wait for 100 ns;
-        s_in(31 downto 26) <= "000000";
-        s_in(5 downto 0) <= "------";
-
-        wait for 100 ns;
-
-        assert s_RegDst = '1' report "RegDst incorrect." severity failure;
-        assert s_Mem_To_Reg = '0' report "o_Mem_To_Reg incorrect." severity failure;
-        assert s_ALUOP = "0111" report "ALUOp incorrect." severity failure;
-        assert s_MemWrite = '0' report "MemWrite incorrect." severity failure;
-        assert s_ALUSrc = '0' report "ALUSrc incorrect." severity failure;
-        assert s_RegWrite = '1' report "RegWrite incorrect." severity failure;
-        ------------- END TEST ------------
-
-        ------------- TEST ---------------
         report "Beginning SLTI test";
         -- zero out the instruction
         s_in <= std_logic_vector(to_unsigned(0, s_in'length));
@@ -474,8 +469,8 @@ begin
 
         wait for 100 ns;
 
-        assert s_RegDst = '-' report "RegDst incorrect." severity failure;
-        assert s_Mem_To_Reg = '-' report "o_Mem_To_Reg incorrect." severity failure;
+        assert s_RegDst = '0' or s_RegDst = '1' report "RegDst incorrect." severity failure;
+        assert s_Mem_To_Reg = '0' or  s_Mem_To_Reg = '1' report "o_Mem_To_Reg incorrect." severity failure;
         assert s_ALUOP = "0000" report "ALUOp incorrect." severity failure;
         assert s_MemWrite = '1' report "MemWrite incorrect." severity failure;
         assert s_ALUSrc = '1' report "ALUSrc incorrect." severity failure;
