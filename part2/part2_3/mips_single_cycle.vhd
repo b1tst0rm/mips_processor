@@ -110,7 +110,9 @@ architecture structure of mips_single_cycle is
     signal s_mem_addr : natural range 0 to 2**10 - 1;
 
 begin
-    s_mem_addr <= to_integer(unsigned(s_ALU_Out)); -- must convert to a natural address to hand to mem module
+    --This needs to be here otherwise we sometimes get out of bounds fatal errors....
+    s_mem_addr <= 0 when (s_MemWrite = '0' or s_Mem_To_Reg = '0') else
+                         to_integer(unsigned(s_Alu_Out)); -- must convert to a natural address to hand to mem module
 
     fetch_instruc: fetch_logic
         port map (i_clock, i_reset, s_Instruc);
