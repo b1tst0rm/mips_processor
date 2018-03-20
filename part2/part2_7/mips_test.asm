@@ -81,11 +81,11 @@ simpleFunc:
 	jr $31                          # 0x000000ac + 4 = 0x000000b0
 
 loadAndStoreTest:
-	lui $1, 4097                    # 4097 = 1001 hex. The upper 16 bits is stored in $1 - Results in 0x10010000 in hex
-	addi $25, $0, 1000              # Load &A into $25 (mem location 0x10000000)
-	addi $1, $0, 4		        # $1 = 4
-	addi $2, $0, 8		        # $2 = 8
-	sw $1, 0($25) 			# Store A[0] into $1
-	sw $2, 4($25) 			# Store A[1] into $2
-	lw $3, 0($25) 			# Load A[0] into $3
-	lw $4, 4($25) 			# Load A[1] into $4
+	lui $8, 4096                    # $8 = 0x10000000
+	ori $8, $8, 0                   # $8 = 0x10000000 -> These two implement the load address pseudo instruction.
+	addi $9, $0, 4                  # $9 = 4
+	addi $10, $0, 8                 # $10 = 8
+	sw $9, 0($8)                    # Store $9 into A[0] -> '4' is stored in mem 0x10000000
+	sw $10, 4($8)                   # Store $10 into A[1] -> '8' is stored in mem 0x10000004
+	lw $11, 0($8)                   # Load A[0] into $11 -> load value from memory 0x10000000 which is '4'
+	lw $12, 4($8)                   # Load A[1] into $12 -> load value from memory 0x10000004 which is '8'
