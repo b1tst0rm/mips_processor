@@ -1,4 +1,4 @@
-# This is a program that makes use of all the MIPS instruction from part (a) of Proj2.
+# This is a program that makes use of all the MIPS instruction from part (b) of Proj2.
 
 .text
 .globl main
