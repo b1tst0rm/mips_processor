@@ -1,38 +1,53 @@
-20210001
-24420003
-00221820
-00222021
-30650003
-00843024
-20010001
-00211825
-34030000
-00211827
-00201826
-38230000
-20010000
-20020001
-0022182a
-28430000
-2c030001
-0041182b
-20010002
-00011080
-00021082
-00021043
-00221004
-00221006
-00411007
-20010002
-20020001
-20030004
-00222022
-00622023
-3c011001
-201903e8
-20010004
-20020008
-af210000
-af220004
-8f230000
-8f240004
+00000000 // address 0: noop works
+
+// addTest
+20210001 // address 1: addi works
+24420003 // works
+00221820 // works
+00222021 // works
+
+// andTest
+30650003 // works
+00843024 // works
+
+// orTest
+20010001 // works
+00211825 // works
+34030000 // works
+00211827 // NOR INCORRECT, gives XXXXXXXX
+00201826 // works
+38230000 // works
+
+// sltTest
+20010000 // works
+20020001 // works
+0022182a // works
+28430000 // works
+2c030001 // works
+0041182b // FAILS, GAVE 1, EXPECTED 0
+
+// shiftTest
+20010002 // works
+00011080 // works
+00021082 // FAILS, GAVE 8, EXPECTED 2
+00021043 // skipped
+00221004 // skipped
+00221006 // skipped
+00411007 // skipped
+
+// subTest
+20010002 // works
+20020001 // works
+20030004 // works
+00222022 // works
+00622023 // works
+
+// loadAndStoreTest
+3c011001 // works
+201903e8 // works
+20010004 // works
+20020008 // works
+af210000 // fails?
+af220004 // fails?
+8f230000 // fails?
+8f240004 // fails?

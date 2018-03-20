@@ -22,7 +22,8 @@ entity mips_single_cycle is
           i_clock       : in std_logic;    -- processor clock
           o_CF          : out std_logic;   -- carry flag
           o_OVF         : out std_logic;   -- overflow flag
-          o_ZF          : out std_logic ); -- zero flag
+          o_ZF          : out std_logic;    -- zero flag
+          o_PC          : out std_logic_vector(29 downto 0) ); -- program counter (PC)
 end mips_single_cycle;
 
 architecture structure of mips_single_cycle is
@@ -40,9 +41,10 @@ architecture structure of mips_single_cycle is
     end component;
 
     component fetch_logic is
-        port( i_Clock       : in std_logic;
-              i_Reset       : in std_logic;
-              o_Instruction : out std_logic_vector(31 downto 0) );
+        port ( i_Clock       : in std_logic;
+               i_Reset       : in std_logic;
+               o_Instruction : out std_logic_vector(31 downto 0);
+               o_PC          : out std_logic_vector(29 downto 0) );
     end component;
 
     component control is
@@ -115,7 +117,7 @@ begin
                          to_integer(unsigned(s_Alu_Out)); -- must convert to a natural address to hand to mem module
 
     fetch_instruc: fetch_logic
-        port map (i_clock, i_reset, s_Instruc);
+        port map (i_clock, i_reset, s_Instruc, o_PC);
 
     control_logic: control
         port map (s_Instruc, s_RegDst, s_Mem_To_Reg, s_ALUOp, s_MemWrite, s_ALUSrc, s_RegWrite);

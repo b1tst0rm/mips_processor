@@ -46,6 +46,8 @@ begin
                 all_outputs <= "011010011"; -- xor
             elsif funct = "100101" then
                 all_outputs <= "000010011"; -- or
+            elsif funct = "100111" then
+                all_outputs <= "011000011"; -- nor
             elsif funct = "000000" then
                 all_outputs <= "010010011"; --sll
             elsif funct = "000010" then
@@ -75,8 +77,6 @@ begin
                 all_outputs <= "010010110"; -- lui
             elsif op = "100011" then
                 all_outputs <= "100000110"; -- lw
-            elsif op = "100111" then
-                all_outputs <= "011000011"; -- nor
             elsif op = "001110" then
                 all_outputs <= "011010110"; -- xori
             elsif op = "001101" then

@@ -13,7 +13,8 @@ use IEEE.numeric_std.all;
 entity fetch_logic is
     port( i_Clock       : in std_logic;
           i_Reset       : in std_logic;
-          o_Instruction : out std_logic_vector(31 downto 0) );
+          o_Instruction : out std_logic_vector(31 downto 0);
+          o_PC          : out std_logic_vector(29 downto 0) );
 end fetch_logic;
 
 --- Define the architecture ---
@@ -59,6 +60,8 @@ begin
     s_MemData_Placehold <= (others => '0'); -- we won't be writing this to mem but we do need to provide a Signal
     s_Convert_Addr <= s_PC_Out(31 downto 2); -- chop off the 2 LSBs to conform to word addressing of mem module
     s_convert_to_nat <= to_integer(unsigned(s_Convert_Addr)); -- mem module needs a natural value
+
+    o_PC <= s_PC_Out(31 downto 2);
 
     increment: full_adder_struct_nbit
         port map (s_PC_Out, s_Four, s_Cin, s_Cout, s_Add_Out);
