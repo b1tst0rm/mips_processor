@@ -1,0 +1,9 @@
+00000000 // address 0: noop (works)
+
+// sltTest
+20010000 // works
+20020001 // works
+0022182a // works
+28430000 // works
+2c030001 // works
+0041182b // FAILS, GAVE 1, EXPECTED 0

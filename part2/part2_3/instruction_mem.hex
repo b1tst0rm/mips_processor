@@ -1,7 +1,7 @@
 00000000 // address 0: noop works
 
 // addTest
-20210001 // address 1: addi works
+20210001 // address 1: works
 24420003 // works
 00221820 // works
 00222021 // works
@@ -14,7 +14,7 @@
 20010001 // works
 00211825 // works
 34030000 // works
-00211827 // NOR INCORRECT, gives XXXXXXXX
+00211827 // works
 00201826 // works
 38230000 // works
 

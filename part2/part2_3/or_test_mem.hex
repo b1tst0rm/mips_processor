@@ -1,7 +1,0 @@
-00000000 // address 0: noop works
-
-// orTest
-20010001 // works
-00211825 // works
-34030000 // works
-00211827 // NOR INCORRECT, gives XXXXXXXX

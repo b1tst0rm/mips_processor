@@ -36,6 +36,8 @@ begin
         -- R-type
             if funct = "101010" then
                 all_outputs <= "001110011"; -- slt
+            elsif funct = "101011" then
+                all_outputs <= "001110011"; -- sltu
             elsif funct = "100000" then
                 all_outputs <= "000100011"; -- and
             elsif funct = "100001" then
@@ -49,26 +51,26 @@ begin
             elsif funct = "100111" then
                 all_outputs <= "011000011"; -- nor
             elsif funct = "000000" then
-                all_outputs <= "010010011"; --sll
+                all_outputs <= "010010011"; -- sll
             elsif funct = "000010" then
                 all_outputs <= "010000011"; -- srl
             elsif funct = "000011" then
-                all_outputs <= "010100011"; --sra
+                all_outputs <= "010100011"; -- sra
             elsif funct = "000100" then
                 all_outputs <= "010010011"; -- sllv
             elsif funct = "000110" then
                 all_outputs <= "010000011"; -- srlv
             elsif funct = "100010" then
-                all_outputs <= "001100011"; --sub
+                all_outputs <= "001100011"; -- sub
             elsif funct = "100011" then
-                all_outputs <= "001100011"; --subu
+                all_outputs <= "001100011"; -- subu
             else
-                all_outputs <= "111111111"; --PROBLEM 1!
+                all_outputs <= "111111111"; -- THIS IS AN ISSUE!
             end if;
         else
         -- I-type
             if op = "001000" then
-                all_outputs <= "000100110";    -- addi
+                all_outputs <= "000100110"; -- addi
             elsif op = "001001" then
                 all_outputs <= "000100110"; -- addiu
             elsif op = "001100" then
@@ -90,7 +92,7 @@ begin
             elsif op = "101011" then
                 all_outputs <= "000001100"; -- sw
             else
-                all_outputs <= "111111110"; --PROBLEM 0!
+                all_outputs <= "111111110"; -- THIS IS AN ISSUE!
             end if;
         end if;
 

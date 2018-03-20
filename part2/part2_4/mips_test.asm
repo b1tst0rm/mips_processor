@@ -19,7 +19,7 @@ orTest:
 	addi $1, $zero, 1		# $1 = 1
 	or $3, $1, $1 			# 1 OR 1 = 1, $3 = 1
 	ori $3, $zero, 0		# 1 OR 0 = 0, $3 = 0
-	nor $3, $1, $1			# 1 NOR 1 = 0, $3 = -2? => $3 = 0xfffffffe # FAILS GIVES XXXXXXX
+	nor $3, $1, $1			# 1 NOR 1 = 0, $3 = -2? => $3 = 0xfffffffe
 	xor $3, $1, $zero		# 1 XOR 0 = 1, $3 = 1
 	xori $3, $1, 0			# 1 XOR 0 = 1, $3 = 1
 
