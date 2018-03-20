@@ -50,39 +50,39 @@ subTest:
 beqTest:
 	addi $1, $zero, 0		# $1 = 0
 	addi $2, $zero, 0		# $2 = 0
-	j beqCond               # jump to beqCond -> test for branch equal
+	j beqCond                       # jump to beqCond -> test for branch equal
 
 beqCond:
-	beq $1, $2, beqTrue     # if ($1 == $2) -> goto beqTrue;
+	beq $1, $2, beqTrue             # if ($1 == $2) -> goto beqTrue;
 
 beqTrue:
-	addi $1, $zero, 1       # $1 = 1 if true
-	j bneTest               # goto bneTest;
+	addi $1, $zero, 1               # $1 = 1 if true
+	j bneTest                       # goto bneTest;
 
 bneTest:
-	addi $1, $zero, 0       # $1 = 0
-	addi $2, $zero, 0       # $2 = 0
-	j bneCond               # jump to bneCond -> test for branch not equal
+	addi $1, $zero, 0               # $1 = 0
+	addi $2, $zero, 0               # $2 = 0
+	j bneCond                       # jump to bneCond -> test for branch not equal
 
 bneCond:
-	bne $1, $2, bneTrue     # if ($1 != $2) -> goto bneTrue // In this case I test for false
-	j bneFalse              # bne will fail cause 0 != 0 -> hence we jump to bneFalse
+	bne $1, $2, bneTrue             # if ($1 != $2) -> goto bneTrue // In this case I test for false
+	j bneFalse                      # bne will fail cause 0 != 0 -> hence we jump to bneFalse
 
 bneTrue:
-	addi $1, $zero, 1       # $1 = 1 if bne succeeds
+	addi $1, $zero, 1               # $1 = 1 if bne succeeds
 
 bneFalse:
-	addi $2, $zero, 1       # $2 = 1 if bne fails
-	jal simpleFunc          # Jump and link to simpleFunc(tion), after this $2 will be set to 2. // PC = 0x000000ac
-	j loadAndStoreTest      # After our JAL, proceed to loadAndStoreTest
+	addi $2, $zero, 1               # $2 = 1 if bne fails
+	jal simpleFunc                  # Jump and link to simpleFunc(tion), after this $2 will be set to 2. // PC = 0x000000ac
+	j loadAndStoreTest              # After our JAL, proceed to loadAndStoreTest
 
 simpleFunc:
-	addi $2, $zero, 2       # $2 = 2
-	jr $ra                  # 0x000000ac + 4 = 0x000000b0
+	addi $2, $zero, 2               # $2 = 2
+	jr $ra                          # 0x000000ac + 4 = 0x000000b0
 	
 loadAndStoreTest:
-	lui $1, 4097            # 4097 = 1001 hex. The upper 16 bits is stored in $1 - Results in 0x10010000 in hex
-	addi $25, $0, 1000      # Load &A into $25 (mem location 0x10000000)
+	lui $1, 4097                    # 4097 = 1001 hex. The upper 16 bits is stored in $1 - Results in 0x10010000 in hex
+	addi $25, $0, 1000              # Load &A into $25 (mem location 0x10000000)
 	addi $1, $zero, 4		# $1 = 4
 	addi $2, $zero, 8		# $2 = 8
 	sw $1, 0($25) 			# Store A[0] into $1
