@@ -13,11 +13,11 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 
 entity sel_alu_a is
-    port( i_ALUSrc   : in std_logic; -- signal from control unit
-          i_RD1      : in std_logic_vector(31 downto 0); -- signal from register file
-          i_ALUOP    : in std_logic_vector(3 downto 0); -- signal from control unit
-          i_shamt    : in std_logic_vector(31 downto 0); -- 32 bit shift amount
-          i_mux2_sel : in std_logic; -- selector for the second 2-1 mux that gets set in control unit
+    port( i_ALUSrc   : in std_logic;                        -- signal from control unit
+          i_RD1      : in std_logic_vector(31 downto 0);    -- signal from register file
+          i_ALUOP    : in std_logic_vector(3 downto 0);     -- signal from control unit
+          i_shamt    : in std_logic_vector(31 downto 0);    -- 32 bit shift amount
+          i_mux2_sel : in std_logic;                        -- selector for the second 2-1 mux that gets set in control unit
           o_data     : out std_logic_vector(31 downto 0) ); -- selected data
 end sel_alu_a;
 

@@ -29,11 +29,11 @@
 // shiftTest
 20010002 // works
 00011080 // works
-00021082 // FAILS, GAVE 8, EXPECTED 2
-00021043 // skipped
-00221004 // skipped
-00221006 // skipped
-00411007 // skipped
+00021082 // works
+00021043 // works
+00221004 // works
+00221006 // works
+00411007 // works
 
 // subTest
 20010002 // works
@@ -47,7 +47,7 @@
 201903e8 // works
 20010004 // works
 20020008 // works
-af210000 // fails?
-af220004 // fails?
-8f230000 // fails?
-8f240004 // fails?
+af210000 // works
+af220004 // works
+8f230000 // works
+8f240004 // works

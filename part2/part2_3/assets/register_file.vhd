@@ -1,6 +1,6 @@
 -- register_file.vhd
 -------------------------------------------------------------------------
--- DESCRIPTION: 32, 32-bit register file implementation using (mostly)
+-- DESCRIPTION: 32, 32-bit register file implementation using
 -- structural VHDL
 
 -- AUTHOR: Daniel Limanowski
@@ -74,8 +74,15 @@ architecture structure of register_file is
               o_F   : out std_logic_vector(31 downto 0) );  -- the selected output
     end component;
 
+    component and2_MS is
+      port(i_A          : in std_logic;
+           i_B          : in std_logic;
+           o_F          : out std_logic);
+    end component;
+
 -- Define some intermediary signals
 signal s_decoded : std_logic_vector(31 downto 0);
+signal s_write : std_logic_vector(31 downto 0);
 
 type vector32 is array (natural range<>) of std_logic_vector(31 downto 0); -- SEE: http://www.ics.uci.edu/~jmoorkan/vhdlref/arrays.html
 signal s_register_data: vector32(31 downto 0);
@@ -86,14 +93,11 @@ decode_WR: decoder_5to32
     port map(i_WR, s_decoded);
 
 generate_registers: for i in 1 to 31 generate -- skip $0 as it will be wired to 0 later
-    -- this with-select is crucial: we must disable writing to the specific register if the i_REGWRITE = 0,
-    -- or allow it ONLY if i_REGWRITE = 1
-    --with i_REGWRITE select
-    --    s_decoded <= ('0' => others) when '0',
-    --                 s_decoded when others;
-    -- TODO ^^^^^^^^^
-    register_32bit: register_nbit   -- TODO: expand in the WE part...may need to check w/ actual WE
-        port map(i_CLK, i_RST, i_WD, s_decoded(i), s_register_data(i));
+    do_write: and2_MS
+        port map(s_decoded(i), i_REGWRITE, s_write(i)); -- only enable writing if the input WE is enabled
+
+    register_32bit: register_nbit
+        port map(i_CLK, i_RST, i_WD, s_write(i), s_register_data(i));
 end generate;
 
 register_0: register_nbit   -- Set $0

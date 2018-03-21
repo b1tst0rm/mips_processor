@@ -11,7 +11,7 @@
 -------------------------------------------------------------------------
 
 -- Enter this command while simulating to load intruction memory:
--- mem load -infile instruction_mem.hex -format hex /mips_single_cycle/fetch_instruc/instruc_mem/ram
+-- mem load -infile {FILENAME HERE}.hex -format hex /mips_single_cycle/fetch_instruc/instruc_mem/ram
 
 library IEEE;
 use IEEE.std_logic_1164.all;
@@ -22,7 +22,7 @@ entity mips_single_cycle is
           i_clock       : in std_logic;    -- processor clock
           o_CF          : out std_logic;   -- carry flag
           o_OVF         : out std_logic;   -- overflow flag
-          o_ZF          : out std_logic;    -- zero flag
+          o_ZF          : out std_logic;   -- zero flag
           o_PC          : out std_logic_vector(29 downto 0) ); -- program counter (PC)
 end mips_single_cycle;
 
@@ -49,7 +49,7 @@ architecture structure of mips_single_cycle is
 
     component control is
         port( i_Instruction    : in std_logic_vector(31 downto 0);
-              o_Sel_ALU_A_Mux2 : out std_logic; -- set to 1 if ALUOP = 1001, 1000, or 1010
+              o_Sel_ALU_A_Mux2 : out std_logic;
               o_RegDst         : out std_logic;
               o_Mem_To_Reg     : out std_logic;
               o_ALUOP		   : out std_logic_vector(3 downto 0);
@@ -65,12 +65,12 @@ architecture structure of mips_single_cycle is
     end component;
 
     component sel_alu_a is
-        port( i_ALUSrc   : in std_logic; -- signal from control unit
-              i_RD1      : in std_logic_vector(31 downto 0); -- signal from register file
-              i_ALUOP    : in std_logic_vector(3 downto 0); -- signal from control unit
-              i_shamt    : in std_logic_vector(31 downto 0); -- 32 bit shift amount
-              i_mux2_sel : in std_logic; -- selector for the second 2-1 mux that gets set in control unit
-              o_data     : out std_logic_vector(31 downto 0) ); -- selected data
+        port( i_ALUSrc   : in std_logic;
+              i_RD1      : in std_logic_vector(31 downto 0);
+              i_ALUOP    : in std_logic_vector(3 downto 0);
+              i_shamt    : in std_logic_vector(31 downto 0);
+              i_mux2_sel : in std_logic;
+              o_data     : out std_logic_vector(31 downto 0) );
     end component;
 
     component alu32 is
@@ -114,8 +114,8 @@ architecture structure of mips_single_cycle is
     signal s_mem_addr : natural range 0 to 2**10 - 1;
 
 begin
-    --This needs to be here otherwise we sometimes get out of bounds fatal errors....
-    s_mem_addr <= 0 when (s_MemWrite = '0' or s_Mem_To_Reg = '0') else
+    -- This needs to be here otherwise we sometimes get out of bounds due to non-memory operations.
+    s_mem_addr <= 0 when (s_Mem_To_Reg = '0') else
                          to_integer(unsigned(s_Alu_Out)); -- must convert to a natural address to hand to mem module
 
     fetch_instruc: fetch_logic
