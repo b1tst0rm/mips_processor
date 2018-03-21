@@ -88,3 +88,5 @@ loadAndStoreTest:
 	sw $1, 0($25) 			# Store A[0] into $1
 	sw $2, 4($25) 			# Store A[1] into $2
 	lw $3, 0($25) 			# Load A[0] into $3
+	lw $4, 4($25) 			# Load A[1] into $4
+	
