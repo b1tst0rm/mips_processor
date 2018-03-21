@@ -14,7 +14,7 @@ entity register_file is
           i_RST       : in std_logic;                         -- Reset
           i_WR        : in std_logic_vector(4 downto 0);      -- Write Register
           i_WD        : in std_logic_vector(31 downto 0);     -- Write Data
-          i_REGWRITE  : in std_logic;                         -- Write Enable   
+          i_REGWRITE  : in std_logic;                         -- Write Enable
           i_RR1       : in std_logic_vector(4 downto 0);      -- Read Register 1
           i_RR2       : in std_logic_vector(4 downto 0);      -- Read Register 2
           o_RD1       : out std_logic_vector(31 downto 0);    -- Read Data 1
@@ -28,48 +28,48 @@ architecture structure of register_file is
         port( i_CLK  : in std_logic;
               i_RST  : in std_logic;
               i_WD   : in std_logic_vector(N-1 downto 0);    -- WD = write data
-              i_WE   : in std_logic;                         -- WE = write enable   
+              i_WE   : in std_logic;                         -- WE = write enable
               o_Q    : out std_logic_vector(N-1 downto 0) ); -- Output requested data
     end component;
 
     component decoder_5to32
         port( i_D : in std_logic_vector(4 downto 0);
-              o_F : out std_logic_vector(31 downto 0) ); 
+              o_F : out std_logic_vector(31 downto 0) );
     end component;
 
     component mux_32to1 is
         port( i_SEL : in std_logic_vector(4 downto 0); -- 5 bit selector
               i_0   : in std_logic_vector(31 downto 0); -- first of 32 inputs to mux
-              i_1   : in std_logic_vector(31 downto 0); 
-              i_2   : in std_logic_vector(31 downto 0); 
-              i_3   : in std_logic_vector(31 downto 0); 
-              i_4   : in std_logic_vector(31 downto 0); 
-              i_5   : in std_logic_vector(31 downto 0); 
-              i_6   : in std_logic_vector(31 downto 0); 
-              i_7   : in std_logic_vector(31 downto 0); 
-              i_8   : in std_logic_vector(31 downto 0); 
-              i_9   : in std_logic_vector(31 downto 0); 
-              i_10  : in std_logic_vector(31 downto 0); 
-              i_11  : in std_logic_vector(31 downto 0); 
-              i_12  : in std_logic_vector(31 downto 0); 
-              i_13  : in std_logic_vector(31 downto 0); 
-              i_14  : in std_logic_vector(31 downto 0); 
-              i_15  : in std_logic_vector(31 downto 0); 
-              i_16  : in std_logic_vector(31 downto 0); 
-              i_17  : in std_logic_vector(31 downto 0); 
-              i_18  : in std_logic_vector(31 downto 0); 
-              i_19  : in std_logic_vector(31 downto 0); 
-              i_20  : in std_logic_vector(31 downto 0); 
-              i_21  : in std_logic_vector(31 downto 0); 
-              i_22  : in std_logic_vector(31 downto 0); 
-              i_23  : in std_logic_vector(31 downto 0); 
-              i_24  : in std_logic_vector(31 downto 0); 
-              i_25  : in std_logic_vector(31 downto 0); 
-              i_26  : in std_logic_vector(31 downto 0); 
-              i_27  : in std_logic_vector(31 downto 0); 
-              i_28  : in std_logic_vector(31 downto 0); 
-              i_29  : in std_logic_vector(31 downto 0); 
-              i_30  : in std_logic_vector(31 downto 0); 
+              i_1   : in std_logic_vector(31 downto 0);
+              i_2   : in std_logic_vector(31 downto 0);
+              i_3   : in std_logic_vector(31 downto 0);
+              i_4   : in std_logic_vector(31 downto 0);
+              i_5   : in std_logic_vector(31 downto 0);
+              i_6   : in std_logic_vector(31 downto 0);
+              i_7   : in std_logic_vector(31 downto 0);
+              i_8   : in std_logic_vector(31 downto 0);
+              i_9   : in std_logic_vector(31 downto 0);
+              i_10  : in std_logic_vector(31 downto 0);
+              i_11  : in std_logic_vector(31 downto 0);
+              i_12  : in std_logic_vector(31 downto 0);
+              i_13  : in std_logic_vector(31 downto 0);
+              i_14  : in std_logic_vector(31 downto 0);
+              i_15  : in std_logic_vector(31 downto 0);
+              i_16  : in std_logic_vector(31 downto 0);
+              i_17  : in std_logic_vector(31 downto 0);
+              i_18  : in std_logic_vector(31 downto 0);
+              i_19  : in std_logic_vector(31 downto 0);
+              i_20  : in std_logic_vector(31 downto 0);
+              i_21  : in std_logic_vector(31 downto 0);
+              i_22  : in std_logic_vector(31 downto 0);
+              i_23  : in std_logic_vector(31 downto 0);
+              i_24  : in std_logic_vector(31 downto 0);
+              i_25  : in std_logic_vector(31 downto 0);
+              i_26  : in std_logic_vector(31 downto 0);
+              i_27  : in std_logic_vector(31 downto 0);
+              i_28  : in std_logic_vector(31 downto 0);
+              i_29  : in std_logic_vector(31 downto 0);
+              i_30  : in std_logic_vector(31 downto 0);
               i_31  : in std_logic_vector(31 downto 0);
               o_F   : out std_logic_vector(31 downto 0) );  -- the selected output
     end component;
@@ -86,6 +86,12 @@ decode_WR: decoder_5to32
     port map(i_WR, s_decoded);
 
 generate_registers: for i in 1 to 31 generate -- skip $0 as it will be wired to 0 later
+    -- this with-select is crucial: we must disable writing to the specific register if the i_REGWRITE = 0,
+    -- or allow it ONLY if i_REGWRITE = 1
+    --with i_REGWRITE select
+    --    s_decoded <= ('0' => others) when '0',
+    --                 s_decoded when others;
+    -- TODO ^^^^^^^^^
     register_32bit: register_nbit   -- TODO: expand in the WE part...may need to check w/ actual WE
         port map(i_CLK, i_RST, i_WD, s_decoded(i), s_register_data(i));
 end generate;
@@ -97,73 +103,73 @@ register_0: register_nbit   -- Set $0
 mux_RD1: mux_32to1
     port map ( i_SEL => i_RR1, -- 5 bit selector
           i_0   => s_register_data(0), -- $0 = zero or '0' at all times
-          i_1   => s_register_data(1), 
-          i_2   => s_register_data(2), 
-          i_3   => s_register_data(3), 
-          i_4   => s_register_data(4), 
-          i_5   => s_register_data(5), 
-          i_6   => s_register_data(6), 
-          i_7   => s_register_data(7), 
-          i_8   => s_register_data(8), 
-          i_9   => s_register_data(9), 
-          i_10  => s_register_data(10), 
-          i_11  => s_register_data(11), 
-          i_12  => s_register_data(12), 
-          i_13  => s_register_data(13), 
-          i_14  => s_register_data(14), 
-          i_15  => s_register_data(15), 
-          i_16  => s_register_data(16), 
-          i_17  => s_register_data(17), 
-          i_18  => s_register_data(18), 
-          i_19  => s_register_data(19), 
-          i_20  => s_register_data(20), 
+          i_1   => s_register_data(1),
+          i_2   => s_register_data(2),
+          i_3   => s_register_data(3),
+          i_4   => s_register_data(4),
+          i_5   => s_register_data(5),
+          i_6   => s_register_data(6),
+          i_7   => s_register_data(7),
+          i_8   => s_register_data(8),
+          i_9   => s_register_data(9),
+          i_10  => s_register_data(10),
+          i_11  => s_register_data(11),
+          i_12  => s_register_data(12),
+          i_13  => s_register_data(13),
+          i_14  => s_register_data(14),
+          i_15  => s_register_data(15),
+          i_16  => s_register_data(16),
+          i_17  => s_register_data(17),
+          i_18  => s_register_data(18),
+          i_19  => s_register_data(19),
+          i_20  => s_register_data(20),
           i_21  => s_register_data(21),
-          i_22  => s_register_data(22), 
-          i_23  => s_register_data(23), 
-          i_24  => s_register_data(24), 
-          i_25  => s_register_data(25), 
-          i_26  => s_register_data(26), 
-          i_27  => s_register_data(27), 
-          i_28  => s_register_data(28), 
-          i_29  => s_register_data(29), 
-          i_30  => s_register_data(30), 
-          i_31  => s_register_data(31), 
+          i_22  => s_register_data(22),
+          i_23  => s_register_data(23),
+          i_24  => s_register_data(24),
+          i_25  => s_register_data(25),
+          i_26  => s_register_data(26),
+          i_27  => s_register_data(27),
+          i_28  => s_register_data(28),
+          i_29  => s_register_data(29),
+          i_30  => s_register_data(30),
+          i_31  => s_register_data(31),
           o_F   => o_RD1 );  -- the selected output
 
 mux_RD2: mux_32to1
     port map ( i_SEL => i_RR2, -- 5 bit selector
           i_0   => s_register_data(0), -- $0 = zero or '0' at all times
-          i_1   => s_register_data(1), 
-          i_2   => s_register_data(2), 
-          i_3   => s_register_data(3), 
-          i_4   => s_register_data(4), 
-          i_5   => s_register_data(5), 
-          i_6   => s_register_data(6), 
-          i_7   => s_register_data(7), 
-          i_8   => s_register_data(8), 
-          i_9   => s_register_data(9), 
-          i_10  => s_register_data(10), 
-          i_11  => s_register_data(11), 
-          i_12  => s_register_data(12), 
-          i_13  => s_register_data(13), 
-          i_14  => s_register_data(14), 
-          i_15  => s_register_data(15), 
-          i_16  => s_register_data(16), 
-          i_17  => s_register_data(17), 
-          i_18  => s_register_data(18), 
-          i_19  => s_register_data(19), 
-          i_20  => s_register_data(20), 
+          i_1   => s_register_data(1),
+          i_2   => s_register_data(2),
+          i_3   => s_register_data(3),
+          i_4   => s_register_data(4),
+          i_5   => s_register_data(5),
+          i_6   => s_register_data(6),
+          i_7   => s_register_data(7),
+          i_8   => s_register_data(8),
+          i_9   => s_register_data(9),
+          i_10  => s_register_data(10),
+          i_11  => s_register_data(11),
+          i_12  => s_register_data(12),
+          i_13  => s_register_data(13),
+          i_14  => s_register_data(14),
+          i_15  => s_register_data(15),
+          i_16  => s_register_data(16),
+          i_17  => s_register_data(17),
+          i_18  => s_register_data(18),
+          i_19  => s_register_data(19),
+          i_20  => s_register_data(20),
           i_21  => s_register_data(21),
-          i_22  => s_register_data(22), 
-          i_23  => s_register_data(23), 
-          i_24  => s_register_data(24), 
-          i_25  => s_register_data(25), 
-          i_26  => s_register_data(26), 
-          i_27  => s_register_data(27), 
-          i_28  => s_register_data(28), 
-          i_29  => s_register_data(29), 
-          i_30  => s_register_data(30), 
-          i_31  => s_register_data(31), 
+          i_22  => s_register_data(22),
+          i_23  => s_register_data(23),
+          i_24  => s_register_data(24),
+          i_25  => s_register_data(25),
+          i_26  => s_register_data(26),
+          i_27  => s_register_data(27),
+          i_28  => s_register_data(28),
+          i_29  => s_register_data(29),
+          i_30  => s_register_data(30),
+          i_31  => s_register_data(31),
           o_F   => o_RD2 );  -- the selected output
 
 end structure;

@@ -49,6 +49,7 @@ architecture structure of mips_single_cycle is
 
     component control is
         port( i_Instruction    : in std_logic_vector(31 downto 0);
+              o_Sel_ALU_A_Mux2 : out std_logic; -- set to 1 if ALUOP = 1001, 1000, or 1010
               o_RegDst         : out std_logic;
               o_Mem_To_Reg     : out std_logic;
               o_ALUOP		   : out std_logic_vector(3 downto 0);
@@ -64,11 +65,12 @@ architecture structure of mips_single_cycle is
     end component;
 
     component sel_alu_a is
-        port( i_ALUSrc : in std_logic;
-              i_RD1    : in std_logic_vector(31 downto 0);
-              i_ALUOP  : in std_logic_vector(3 downto 0);
-              i_shamt  : in std_logic_vector(31 downto 0);
-              o_data   : out std_logic_vector(31 downto 0) );
+        port( i_ALUSrc   : in std_logic; -- signal from control unit
+              i_RD1      : in std_logic_vector(31 downto 0); -- signal from register file
+              i_ALUOP    : in std_logic_vector(3 downto 0); -- signal from control unit
+              i_shamt    : in std_logic_vector(31 downto 0); -- 32 bit shift amount
+              i_mux2_sel : in std_logic; -- selector for the second 2-1 mux that gets set in control unit
+              o_data     : out std_logic_vector(31 downto 0) ); -- selected data
     end component;
 
     component alu32 is
@@ -105,7 +107,7 @@ architecture structure of mips_single_cycle is
     end component;
 
     --- Internal Signal Declaration ---
-    signal s_RegDst, s_Mem_To_Reg, s_MemWrite, s_ALUSrc, s_RegWrite : std_logic;
+    signal s_RegDst, s_Mem_To_Reg, s_MemWrite, s_ALUSrc, s_RegWrite, s_Sel_ALU_A_Mux2 : std_logic;
     signal s_ALUOp : std_logic_vector(3 downto 0);
     signal s_Instruc, s_SHAMT, s_WD, s_RD1, s_RD2, s_IMM, s_ALU_B, s_ALU_A, s_ALU_Out, s_DMem_Out : std_logic_vector(31 downto 0);
     signal s_WR : std_logic_vector(4 downto 0);
@@ -120,7 +122,7 @@ begin
         port map (i_clock, i_reset, s_Instruc, o_PC);
 
     control_logic: control
-        port map (s_Instruc, s_RegDst, s_Mem_To_Reg, s_ALUOp, s_MemWrite, s_ALUSrc, s_RegWrite);
+        port map (s_Instruc, s_Sel_ALU_A_Mux2, s_RegDst, s_Mem_To_Reg, s_ALUOp, s_MemWrite, s_ALUSrc, s_RegWrite);
 
     mux_WR: mux_2_1_struct
         generic map (N => 5)
@@ -140,7 +142,7 @@ begin
         port map (s_Instruc(10 downto 6), '1', s_SHAMT); -- 32 bit extend the shift amount
 
     sel_a: sel_alu_a
-        port map (s_ALUSrc, s_RD1, s_ALUOp, s_SHAMT, s_ALU_A);
+        port map (s_ALUSrc, s_RD1, s_ALUOp, s_SHAMT, s_Sel_ALU_A_Mux2, s_ALU_A);
 
     alu: alu32
         port map (s_ALU_A, s_ALU_B, s_ALUOp, s_ALU_Out, o_CF, o_OVF, o_ZF);

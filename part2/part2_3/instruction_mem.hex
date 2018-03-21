@@ -24,7 +24,7 @@
 0022182a // works
 28430000 // works
 2c030001 // works
-0041182b // FAILS, GAVE 1, EXPECTED 0
+0041182b // works
 
 // shiftTest
 20010002 // works

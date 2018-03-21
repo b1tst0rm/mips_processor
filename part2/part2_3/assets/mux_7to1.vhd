@@ -30,8 +30,8 @@ with i_SEL select
     o_F <= i_0  when "0000", -- AND
            i_1  when "0001", -- OR
            i_2  when "0010", -- add  (COMES FROM ADD/SUB UNIT)
-           i_2  when "0110",  -- sub  (COMES FROM ADD/SUB UNIT)
-           i_3  when "0111",  -- slt  (set on less than)
+           i_2  when "0110", -- sub  (COMES FROM ADD/SUB UNIT)
+           i_3  when "0111", -- slt  (set on less than)
            i_4  when "1000", -- srl (COMES FROM BARREL SHIFTER)
            i_4  when "1001", -- sll (COMES FROM BARREL SHIFTER)
            i_4  when "1010", -- sra (COMES FROM BARREL SHIFTER)

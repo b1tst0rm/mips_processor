@@ -13,6 +13,7 @@ use IEEE.numeric_std.all;
 
 entity control is
     port( i_Instruction    : in std_logic_vector(31 downto 0);
+          o_Sel_ALU_A_Mux2 : out std_logic; -- set to 1 if ALUOP = 1001, 1000, or 1010
           o_RegDst         : out std_logic;
           o_Mem_To_Reg     : out std_logic;
           o_ALUOP		   : out std_logic_vector(3 downto 0);
@@ -31,6 +32,7 @@ begin
     begin
         op <= i_Instruction(31 downto 26);
         funct <= i_Instruction(5 downto 0);
+        o_Sel_ALU_A_Mux2 <= '0'; -- initialize to 0
 
         if op = "000000" then
         -- R-type
@@ -52,14 +54,19 @@ begin
                 all_outputs <= "011000011"; -- nor
             elsif funct = "000000" then
                 all_outputs <= "010010011"; -- sll
+                o_Sel_ALU_A_Mux2 <= '1'; -- need SHAMT
             elsif funct = "000010" then
                 all_outputs <= "010000011"; -- srl
+                o_Sel_ALU_A_Mux2 <= '1'; -- need SHAMT
             elsif funct = "000011" then
                 all_outputs <= "010100011"; -- sra
+                o_Sel_ALU_A_Mux2 <= '1'; -- need SHAMT
             elsif funct = "000100" then
                 all_outputs <= "010010011"; -- sllv
             elsif funct = "000110" then
                 all_outputs <= "010000011"; -- srlv
+            elsif funct = "000111" then
+                all_outputs <= "010100011"; -- srav
             elsif funct = "100010" then
                 all_outputs <= "001100011"; -- sub
             elsif funct = "100011" then
@@ -77,8 +84,9 @@ begin
                 all_outputs <= "000000110"; -- andi
             elsif op = "001111" then
                 all_outputs <= "010010110"; -- lui
+                o_Sel_ALU_A_Mux2 <= '1'; -- need 16
             elsif op = "100011" then
-                all_outputs <= "100000110"; -- lw
+                all_outputs <= "100100110"; -- lw
             elsif op = "001110" then
                 all_outputs <= "011010110"; -- xori
             elsif op = "001101" then
@@ -87,10 +95,8 @@ begin
                 all_outputs <= "001110110"; -- slti
             elsif op = "001011" then
                 all_outputs <= "001110110"; -- sltiu
-            elsif op = "000111" then
-                all_outputs <= "010100011"; -- srav
             elsif op = "101011" then
-                all_outputs <= "000001100"; -- sw
+                all_outputs <= "100101100"; -- sw
             else
                 all_outputs <= "111111110"; -- THIS IS AN ISSUE!
             end if;
