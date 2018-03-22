@@ -1,4 +1,5 @@
-00000000 // no-op
+// DO NOT ADD NOOPS!
+// Messes up the place in memory (labels) for jumps
 
 // beqTest:
 20010000

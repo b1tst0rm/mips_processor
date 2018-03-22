@@ -136,7 +136,7 @@ begin
         port map (i_J, i_JAL, s_OR_J);
 
     pc: register_nbit
-        port map (i_Clock, i_Reset, s_AddPC4_Out, '1', s_PC_Out);
+        port map (i_Clock, i_Reset, s_Mux3_Out, '1', s_PC_Out);
 
     instruc_mem: mem
         port map (i_Clock, s_convert_to_nat, s_MemData_Placehold, '0', o_Instruction);

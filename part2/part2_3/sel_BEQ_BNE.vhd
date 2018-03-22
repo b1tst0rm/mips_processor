@@ -18,8 +18,8 @@ end sel_BEQ_BNE;
 architecture dataflow of sel_BEQ_BNE is
 begin
     with i_Select select
-        o_F <= i_Zero_Flag when "01",
-               (not i_Zero_Flag) when "10",
+        o_F <= i_Zero_Flag when "10",
+               (not i_Zero_Flag) when "01",
                i_Zero_Flag when others;
 
 end dataflow;

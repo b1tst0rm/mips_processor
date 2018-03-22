@@ -134,7 +134,8 @@ begin
     o_ALUOP <= all_outputs(7 downto 4);
     o_MemWrite <= all_outputs(3);
     o_ALUSrc <= all_outputs(2);
-    o_RegWrite <= all_outputs(1);
+    o_RegWrite <= '1' when (op = "000011") else -- jal (we need to write address at $31)
+                         all_outputs(1);
     o_RegDst <= all_outputs(0);
 
 end dataflow;
