@@ -13,6 +13,9 @@
 -- Enter this command while simulating to load intruction memory:
 -- mem load -infile {FILENAME HERE}.hex -format hex /mips_single_cycle/fetch_instruc/instruc_mem/ram
 
+-- TODO: There are inconsistencies between word and byte addressing in this Processor
+-- ONLY at Dmem and Imem address should we cut off the 2 LSBs. All other PC values should be 32 bit BYTE ADDRESSED
+
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
@@ -134,7 +137,7 @@ architecture structure of mips_single_cycle is
         s_Sel_ALU_A_Mux2, s_BEQ, s_BNE, s_J, s_JAL, s_JR, s_ZF, s_addJAL_cout : std_logic;
     signal s_ALUOp : std_logic_vector(3 downto 0);
     signal s_Instruc, s_SHAMT, s_WD, s_RD1, s_RD2, s_IMM, s_ALU_B, s_ALU_A,
-        s_ALU_Out, s_DMem_Out, s_Eight, s_JAL_Add_Out, s_PC_32, s_MemToReg_Mux_Out : std_logic_vector(31 downto 0);
+        s_ALU_Out, s_DMem_Out, s_One, s_JAL_Add_Out, s_PC_32, s_MemToReg_Mux_Out, s_JAL_Add_Out_SL2 : std_logic_vector(31 downto 0);
     signal s_WR, s_WR_Instruc, s_ThirtyOne : std_logic_vector(4 downto 0);
     signal s_mem_addr : natural range 0 to 2**10 - 1;
     signal s_PC : std_logic_vector(29 downto 0);
@@ -149,7 +152,7 @@ begin
 
     s_PC_32 <= "00" & s_PC; -- extend PC back to 32 for JAL add
     s_ThirtyOne <= (others => '1'); -- hardcoded to 31 in binary
-    s_Eight <= (3 => '1', others => '0'); -- hardcode 8 for JAL adder
+    s_One <= (0 => '1', others => '0'); -- hardcode 1 for JAL adder TODO: when I fix todo above re byte addressing, this will be changed to four (NOT 8, four is the right value bc we want next address)
 
     fetch_instruc: fetch_logic
         port map (i_clock, i_reset, s_IMM, s_Instruc(25 downto 0), s_BEQ, s_BNE, s_J, s_JAL, s_JR, s_RD1, s_ZF, s_Instruc, s_PC);
@@ -192,9 +195,11 @@ begin
         port map (s_ALU_Out, s_DMem_Out, s_Mem_To_Reg, s_MemToReg_Mux_Out);
 
     add_JAL: full_adder_struct_nbit
-        port map (s_PC_32, s_Eight, '0', s_addJAL_cout, s_JAL_Add_Out);
+        port map (s_PC_32, s_One, '0', s_addJAL_cout, s_JAL_Add_Out);
+
+    s_JAL_Add_Out_SL2 <= s_JAL_Add_Out(29 downto 0) & "00"; -- shift left... TODO: remove this when todos above are fixed
 
     mux_JAL: mux_2_1_struct
-        port map (s_MemToReg_Mux_Out, s_JAL_Add_Out, s_JAL, s_WD);
+        port map (s_MemToReg_Mux_Out, s_JAL_Add_Out_SL2, s_JAL, s_WD);
 
 end structure;
