@@ -1,10 +1,12 @@
 # Copyright 2002 Manu Datta (gmail.com ID Manu dot Datta)
 # All rights reserved
+
+# Modified by Joel16
 	
-.data
+#.data
 #msg1: .asciiz "\nEnter integer values followed by return (-1 terminates input): \n"
-msg2: .asciiz ","
-msg5: .asciiz "\n"
+#msg2: .asciiz ","
+#msg5: .asciiz "\n"
 .text 				
 		
 .globl main
@@ -24,7 +26,7 @@ main:
 
 getValues:     
 	addiu $v0, $0, 5            # get input value in v0 
-	syscall                     # syscall 
+	#syscall                     # syscall 
 	beq $v0, $t7, bubblesort    # Once we find -1 (end of array), branch to bubblesort
 	sw $v0, 0($s1)              # Store the value at the mem location pointed by $s1 + 0
 	addi $s1, $s1, 4            # Move the $s1 pointer by 4 - Word addressing (i++)
@@ -51,25 +53,25 @@ internalLoop:
 next:
 	addi $s2, $s2, 4            # $s2 = $s2 + 4
 	bne $s2, $s1, internalLoop  # if ($s2 != $s1) goto internalLoop;
-	addiu $v0, $0, 4            # system call to put the string
-	la $a0, msg5                # print string
-	syscall                     # syscall
-	addiu $v0, $0, 4            # system call to put the string
-	la $a0, msg5                # print string
-	syscall                     # syscall
+	#addiu $v0, $0, 4            # system call to put the string
+	#la $a0, msg5                # print string
+	#syscall                     # syscall
+	#addiu $v0, $0, 4            # system call to put the string
+	#la $a0, msg5                # print string
+	#syscall                     # syscall
 
 printValues:
 	addiu $v0, $0, 1            # print value
 	lw $a0, 0($t4)              # load it from memory $t4 + 0
-	syscall                     # syscall
-	addiu $v0, $0, 4            # system call to string "," for separating values
-	la $a0, msg2                # print string
-	syscall                     # syscall
+	#syscall                     # syscall
+	#addiu $v0, $0, 4            # system call to string "," for separating values
+	#la $a0, msg2                # print string
+	#syscall                     # syscall
 	addi $t4, $t4, 4            # add 4 to memory (word address)
 	bne $t4, $t5, printValues   # if ($t4 != $t5) goto printValues; (if it's not the end value)
 	jal bubblesort              # jump and link bubblesort
 
 endSort:
-	addiu $v0, $0, 5            #
-	syscall                     # syscall
+	#addiu $v0, $0, 5            #
+	#syscall                     # syscall
 	

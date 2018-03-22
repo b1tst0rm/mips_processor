@@ -1,0 +1,7 @@
+// Quick dmem - 2, 8, 5, 1, -1
+
+00000002
+00000008
+00000005
+00000001
+FFFFFFFF // -1 end of array - stops here
