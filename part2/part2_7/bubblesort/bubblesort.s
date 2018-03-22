@@ -17,13 +17,13 @@ main:
 	add $t6, $0, $0             # initializing...  
 	add $t4, $0, $0             # initializing...
 	sub $t7, $0, 1              # terminate at -1 (-1 should be the last element of the array)        
-	#li $v0, 4                   # sycall for enter value string
+	#addiu $v0, $0, 5            # sycall for enter value string
 	#la $a0, msg1                # sycall for enter value string
 	#syscall                     # sycall for enter value string
 	add $s1, $s0, $0            # copy the pointer to array in $s1
 
-getValues:
-	li $v0, 5                   # get input value in v0 
+getValues:     
+	addiu $v0, $0, 5            # get input value in v0 
 	syscall                     # syscall 
 	beq $v0, $t7, bubblesort    # Once we find -1 (end of array), branch to bubblesort
 	sw $v0, 0($s1)              # Store the value at the mem location pointed by $s1 + 0
@@ -51,18 +51,18 @@ internalLoop:
 next:
 	addi $s2, $s2, 4            # $s2 = $s2 + 4
 	bne $s2, $s1, internalLoop  # if ($s2 != $s1) goto internalLoop;
-	li $v0, 4                   # system call to put the string
+	addiu $v0, $0, 4            # system call to put the string
 	la $a0, msg5                # print string
 	syscall                     # syscall
-	li $v0, 4                   # system call to put the string
+	addiu $v0, $0, 4            # system call to put the string
 	la $a0, msg5                # print string
 	syscall                     # syscall
 
 printValues:
-	li $v0, 1                   # print value
+	addiu $v0, $0, 1            # print value
 	lw $a0, 0($t4)              # load it from memory $t4 + 0
 	syscall                     # syscall
-	li $v0, 4                   # system call to string "," for separating values
+	addiu $v0, $0, 4            # system call to string "," for separating values
 	la $a0, msg2                # print string
 	syscall                     # syscall
 	addi $t4, $t4, 4            # add 4 to memory (word address)
@@ -70,6 +70,6 @@ printValues:
 	jal bubblesort              # jump and link bubblesort
 
 endSort:
-	li $v0, 5                   #
+	addiu $v0, $0, 5            #
 	syscall                     # syscall
 	
