@@ -19,7 +19,12 @@ entity control is
           o_ALUOP		   : out std_logic_vector(3 downto 0);
           o_MemWrite       : out std_logic;
           o_ALUSrc         : out std_logic;
-          o_RegWrite       : out std_logic );
+          o_RegWrite       : out std_logic;
+          o_BEQ            : out std_logic;
+          o_BNE            : out std_logic;
+          o_J              : out std_logic;
+          o_JAL            : out std_logic;
+          o_JR             : out std_logic );
 end control;
 
 --- Define the architecture ---
@@ -33,6 +38,11 @@ begin
         op <= i_Instruction(31 downto 26);
         funct <= i_Instruction(5 downto 0);
         o_Sel_ALU_A_Mux2 <= '0'; -- initialize to 0
+        o_BEQ <= '0';
+        o_BNE <= '0';
+        o_J <= '0';
+        o_JAL <= '0';
+        o_JR <= '0';
 
         if op = "000000" then
         -- R-type
@@ -71,11 +81,14 @@ begin
                 all_outputs <= "001100011"; -- sub
             elsif funct = "100011" then
                 all_outputs <= "001100011"; -- subu
+            elsif funct = "001000" then
+                all_outputs <= "000000000"; -- jr
+                o_JR <= '1';
             else
                 all_outputs <= "111111111"; -- THIS IS AN ISSUE!
             end if;
         else
-        -- I-type
+        -- I-or-J-type
             if op = "001000" then
                 all_outputs <= "000100110"; -- addi
             elsif op = "001001" then
@@ -97,6 +110,18 @@ begin
                 all_outputs <= "001110110"; -- sltiu
             elsif op = "101011" then
                 all_outputs <= "100101100"; -- sw
+            elsif op = "000100" then
+                all_outputs <= "001100000"; -- beq
+                o_BEQ <= '1';
+            elsif op = "000101" then
+                all_outputs <= "001100000"; -- bne
+                o_BNE <= '1';
+            elsif op = "000010" then
+                all_outputs <= "000000000"; -- j
+                o_J <= '1';
+            elsif op = "000011" then
+                all_outputs <= "000000000"; -- jal
+                o_JAL <= '1';
             else
                 all_outputs <= "111111110"; -- THIS IS AN ISSUE!
             end if;

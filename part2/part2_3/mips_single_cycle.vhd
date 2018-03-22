@@ -41,21 +41,35 @@ architecture structure of mips_single_cycle is
     end component;
 
     component fetch_logic is
-        port ( i_Clock       : in std_logic;
-               i_Reset       : in std_logic;
-               o_Instruction : out std_logic_vector(31 downto 0);
-               o_PC          : out std_logic_vector(29 downto 0) );
+        port( i_Clock        : in std_logic;
+              i_Reset        : in std_logic;
+              i_IMM          : in std_logic_vector(31 downto 0);
+              i_Instruc_Curr : in std_logic_vector(25 downto 0);
+              i_BEQ          : in std_logic;
+              i_BNE          : in std_logic;
+              i_J            : in std_logic;
+              i_JAL          : in std_logic;
+              i_JR           : in std_logic;
+              i_RD1          : in std_logic_vector(31 downto 0);
+              i_Zero_Flag    : in std_logic;
+              o_Instruction  : out std_logic_vector(31 downto 0);
+              o_PC           : out std_logic_vector(29 downto 0) );
     end component;
 
     component control is
         port( i_Instruction    : in std_logic_vector(31 downto 0);
-              o_Sel_ALU_A_Mux2 : out std_logic;
+              o_Sel_ALU_A_Mux2 : out std_logic; -- set to 1 if ALUOP = 1001, 1000, or 1010
               o_RegDst         : out std_logic;
               o_Mem_To_Reg     : out std_logic;
               o_ALUOP		   : out std_logic_vector(3 downto 0);
               o_MemWrite       : out std_logic;
               o_ALUSrc         : out std_logic;
-              o_RegWrite       : out std_logic );
+              o_RegWrite       : out std_logic;
+              o_BEQ            : out std_logic;
+              o_BNE            : out std_logic;
+              o_J              : out std_logic;
+              o_JAL            : out std_logic;
+              o_JR             : out std_logic );
     end component;
 
     component extender5to32 is
@@ -106,27 +120,51 @@ architecture structure of mips_single_cycle is
               o_OUT : out std_logic_vector(N-1 downto 0) );
     end component;
 
+    component full_adder_struct_nbit is
+        generic(N : integer := 32);
+        port( i_A    : in std_logic_vector(N-1 downto 0);
+              i_B    : in std_logic_vector(N-1 downto 0);
+              i_Cin  : in std_logic;
+              o_Cout : out std_logic;
+              o_S    : out std_logic_vector(N-1 downto 0) );
+    end component;
+
     --- Internal Signal Declaration ---
-    signal s_RegDst, s_Mem_To_Reg, s_MemWrite, s_ALUSrc, s_RegWrite, s_Sel_ALU_A_Mux2 : std_logic;
+    signal s_RegDst, s_Mem_To_Reg, s_MemWrite, s_ALUSrc, s_RegWrite,
+        s_Sel_ALU_A_Mux2, s_BEQ, s_BNE, s_J, s_JAL, s_JR, s_ZF, s_addJAL_cout : std_logic;
     signal s_ALUOp : std_logic_vector(3 downto 0);
-    signal s_Instruc, s_SHAMT, s_WD, s_RD1, s_RD2, s_IMM, s_ALU_B, s_ALU_A, s_ALU_Out, s_DMem_Out : std_logic_vector(31 downto 0);
-    signal s_WR : std_logic_vector(4 downto 0);
+    signal s_Instruc, s_SHAMT, s_WD, s_RD1, s_RD2, s_IMM, s_ALU_B, s_ALU_A,
+        s_ALU_Out, s_DMem_Out, s_Eight, s_JAL_Add_Out, s_PC_32, s_MemToReg_Mux_Out : std_logic_vector(31 downto 0);
+    signal s_WR, s_WR_Instruc, s_ThirtyOne : std_logic_vector(4 downto 0);
     signal s_mem_addr : natural range 0 to 2**10 - 1;
+    signal s_PC : std_logic_vector(29 downto 0);
 
 begin
     -- This needs to be here otherwise we sometimes get out of bounds due to non-memory operations.
     s_mem_addr <= 0 when (s_Mem_To_Reg = '0') else
                          to_integer(unsigned(s_Alu_Out)); -- must convert to a natural address to hand to mem module
 
+    o_ZF <= s_ZF;
+    o_PC <= s_PC;
+
+    s_PC_32 <= "00" & s_PC; -- extend PC back to 32 for JAL add
+    s_ThirtyOne <= (others => '1'); -- hardcoded to 31 in binary
+    s_Eight <= (3 => '1', others => '0'); -- hardcode 8 for JAL adder
+
     fetch_instruc: fetch_logic
-        port map (i_clock, i_reset, s_Instruc, o_PC);
+        port map (i_clock, i_reset, s_IMM, s_Instruc(25 downto 0), s_BEQ, s_BNE, s_J, s_JAL, s_JR, s_RD1, s_ZF, s_Instruc, s_PC);
 
     control_logic: control
-        port map (s_Instruc, s_Sel_ALU_A_Mux2, s_RegDst, s_Mem_To_Reg, s_ALUOp, s_MemWrite, s_ALUSrc, s_RegWrite);
+        port map (s_Instruc, s_Sel_ALU_A_Mux2, s_RegDst, s_Mem_To_Reg, s_ALUOp,
+                  s_MemWrite, s_ALUSrc, s_RegWrite, s_BEQ, s_BNE, s_J, s_JAL, s_JR);
 
-    mux_WR: mux_2_1_struct
+    mux_WR_Pre: mux_2_1_struct
         generic map (N => 5)
-        port map (s_Instruc(20 downto 16), s_Instruc(15 downto 11), s_RegDst, s_WR);
+        port map (s_Instruc(20 downto 16), s_Instruc(15 downto 11), s_RegDst, s_WR_Instruc);
+
+    mux_WR_Final: mux_2_1_struct
+        generic map (N => 5)
+        port map (s_WR_Instruc, s_ThirtyOne, s_JAL, s_WR);
 
     rf: register_file
         port map (i_clock, i_reset, s_WR, s_WD, s_RegWrite,
@@ -145,12 +183,18 @@ begin
         port map (s_ALUSrc, s_RD1, s_ALUOp, s_SHAMT, s_Sel_ALU_A_Mux2, s_ALU_A);
 
     alu: alu32
-        port map (s_ALU_A, s_ALU_B, s_ALUOp, s_ALU_Out, o_CF, o_OVF, o_ZF);
+        port map (s_ALU_A, s_ALU_B, s_ALUOp, s_ALU_Out, o_CF, o_OVF, s_ZF);
 
     data_mem: mem
         port map (i_clock, s_mem_addr, s_RD2, s_MemWrite, s_DMem_Out);
 
     mux_Mem_To_Reg: mux_2_1_struct
-        port map (s_ALU_Out, s_DMem_Out, s_Mem_To_Reg, s_WD);
+        port map (s_ALU_Out, s_DMem_Out, s_Mem_To_Reg, s_MemToReg_Mux_Out);
+
+    add_JAL: full_adder_struct_nbit
+        port map (s_PC_32, s_Eight, '0', s_addJAL_cout, s_JAL_Add_Out);
+
+    mux_JAL: mux_2_1_struct
+        port map (s_MemToReg_Mux_Out, s_JAL_Add_Out, s_JAL, s_WD);
 
 end structure;
