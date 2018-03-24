@@ -3,18 +3,13 @@
 -- DESCRIPTION: MIPS Straight-Line Single-Cycle Processor (32 bit)
 -- implementation using structural VHDL
 --
--- Supports all of the data-handling MIPS instructions:
--- add, addi, addiu, addu, and, andi, lui, lw, nor, xor, xori, or, ori,
--- slt, slti, sltiu, sltu, sll, srl, sra, sllv, srlv, srav, sw, sub, subu
+-- Supports all standard MIPS instructions.
 --
 -- AUTHOR: Daniel Limanowski
 -------------------------------------------------------------------------
 
 -- Enter this command while simulating to load intruction memory:
 -- mem load -infile {FILENAME HERE}.hex -format hex /mips_single_cycle/fetch_instruc/instruc_mem/ram
-
--- TODO: There are inconsistencies between word and byte addressing in this Processor
--- ONLY at Dmem and Imem address should we cut off the 2 LSBs. All other PC values should be 32 bit BYTE ADDRESSED
 
 library IEEE;
 use IEEE.std_logic_1164.all;
@@ -26,7 +21,7 @@ entity mips_single_cycle is
           o_CF          : out std_logic;   -- carry flag
           o_OVF         : out std_logic;   -- overflow flag
           o_ZF          : out std_logic;   -- zero flag
-          o_PC          : out std_logic_vector(29 downto 0) ); -- program counter (PC)
+          o_PC          : out std_logic_vector(31 downto 0) ); -- program counter (PC) (byte addressable)
 end mips_single_cycle;
 
 architecture structure of mips_single_cycle is
@@ -56,7 +51,7 @@ architecture structure of mips_single_cycle is
               i_RD1          : in std_logic_vector(31 downto 0);
               i_Zero_Flag    : in std_logic;
               o_Instruction  : out std_logic_vector(31 downto 0);
-              o_PC           : out std_logic_vector(29 downto 0) );
+              o_PC           : out std_logic_vector(31 downto 0) );
     end component;
 
     component control is
@@ -76,9 +71,9 @@ architecture structure of mips_single_cycle is
     end component;
 
     component extender5to32 is
-    port( input   : in std_logic_vector(4 downto 0);
-          sign    : in std_logic;
-          output  : out std_logic_vector(31 downto 0) );
+        port( i_input   : in std_logic_vector(4 downto 0);
+              i_sign    : in std_logic;
+              o_output  : out std_logic_vector(31 downto 0) );
     end component;
 
     component sel_alu_a is
@@ -91,21 +86,27 @@ architecture structure of mips_single_cycle is
     end component;
 
     component alu32 is
-            port( i_A        : in  std_logic_vector(31 downto 0);
-                  i_B        : in  std_logic_vector(31 downto 0);
-                  i_ALUOP    : in  std_logic_vector(3  downto 0);
-                  o_F        : out std_logic_vector(31 downto 0);
-                  o_CarryOut : out std_logic;
-                  o_Overflow : out std_logic;
-                  o_Zero     : out std_logic );
+        port( i_A        : in  std_logic_vector(31 downto 0);
+              i_B        : in  std_logic_vector(31 downto 0);
+              i_ALUOP    : in  std_logic_vector(3  downto 0);
+              o_F        : out std_logic_vector(31 downto 0);
+              o_CarryOut : out std_logic;
+              o_Overflow : out std_logic;
+              o_Zero     : out std_logic );
     end component;
 
     component extender16to32 is
-    port( input   : in std_logic_vector(15 downto 0);
-          sign    : in std_logic;
-          output  : out std_logic_vector(31 downto 0) );
+        port( i_input   : in std_logic_vector(15 downto 0);
+              i_sign    : in std_logic;
+              o_output  : out std_logic_vector(31 downto 0) );
     end component;
 
+    -- Note: this memory, used for 1) data and 2) instructions, is WORD
+    -- addressed. As we submit a signal to the address, we need to first
+    -- cut off the 2 Least Significant Bits (LSBs) and then convert the address
+    -- to a "natural" number. All other parts of the processor are using BYTE
+    -- addressing and modules expect this. Only at the addr ports of mem modules
+    -- do we need to convert to word addressing.
     component mem is
     	generic ( DATA_WIDTH : natural := 32; ADDR_WIDTH : natural := 10 );
     	port ( clk	: in std_logic;
@@ -137,22 +138,21 @@ architecture structure of mips_single_cycle is
         s_Sel_ALU_A_Mux2, s_BEQ, s_BNE, s_J, s_JAL, s_JR, s_ZF, s_addJAL_cout : std_logic;
     signal s_ALUOp : std_logic_vector(3 downto 0);
     signal s_Instruc, s_SHAMT, s_WD, s_RD1, s_RD2, s_IMM, s_ALU_B, s_ALU_A,
-        s_ALU_Out, s_DMem_Out, s_One, s_JAL_Add_Out, s_PC_32, s_MemToReg_Mux_Out, s_JAL_Add_Out_SL2 : std_logic_vector(31 downto 0);
+        s_ALU_Out, s_DMem_Out, s_Four, s_JAL_Add_Out, s_MemToReg_Mux_Out : std_logic_vector(31 downto 0);
     signal s_WR, s_WR_Instruc, s_ThirtyOne : std_logic_vector(4 downto 0);
     signal s_mem_addr : natural range 0 to 2**10 - 1;
-    signal s_PC : std_logic_vector(29 downto 0);
+    signal s_PC : std_logic_vector(31 downto 0);
 
 begin
     -- This needs to be here otherwise we sometimes get out of bounds due to non-memory operations.
     s_mem_addr <= 0 when (s_Mem_To_Reg = '0') else
-                         to_integer(unsigned(s_Alu_Out)); -- must convert to a natural address to hand to mem module
+                         to_integer(unsigned(s_Alu_Out(31 downto 2))); -- must chop off 2 LSBs and convert to a natural address to hand to mem module
 
     o_ZF <= s_ZF;
     o_PC <= s_PC;
 
-    s_PC_32 <= "00" & s_PC; -- extend PC back to 32 for JAL add
     s_ThirtyOne <= (others => '1'); -- hardcoded to 31 in binary
-    s_One <= (0 => '1', others => '0'); -- hardcode 1 for JAL adder TODO: when I fix todo above re byte addressing, this will be changed to four (NOT 8, four is the right value bc we want next address)
+    s_Four <= (2 => '1', others => '0'); -- hardcode 4 for JAL adder
 
     fetch_instruc: fetch_logic
         port map (i_clock, i_reset, s_IMM, s_Instruc(25 downto 0), s_BEQ, s_BNE, s_J, s_JAL, s_JR, s_RD1, s_ZF, s_Instruc, s_PC);
@@ -180,7 +180,7 @@ begin
         port map (s_RD2, s_IMM, s_ALUSrc, s_ALU_B);
 
     extend_shamt: extender5to32
-        port map (s_Instruc(10 downto 6), '1', s_SHAMT); -- 32 bit extend the shift amount
+        port map (s_Instruc(10 downto 6), '1', s_SHAMT); -- 32-bit extend the shift amount
 
     sel_a: sel_alu_a
         port map (s_ALUSrc, s_RD1, s_ALUOp, s_SHAMT, s_Sel_ALU_A_Mux2, s_ALU_A);
@@ -195,11 +195,9 @@ begin
         port map (s_ALU_Out, s_DMem_Out, s_Mem_To_Reg, s_MemToReg_Mux_Out);
 
     add_JAL: full_adder_struct_nbit
-        port map (s_PC_32, s_One, '0', s_addJAL_cout, s_JAL_Add_Out);
-
-    s_JAL_Add_Out_SL2 <= s_JAL_Add_Out(29 downto 0) & "00"; -- shift left... TODO: remove this when todos above are fixed
+        port map (s_PC, s_Four, '0', s_addJAL_cout, s_JAL_Add_Out); -- increment current PC by 4
 
     mux_JAL: mux_2_1_struct
-        port map (s_MemToReg_Mux_Out, s_JAL_Add_Out_SL2, s_JAL, s_WD);
+        port map (s_MemToReg_Mux_Out, s_JAL_Add_Out, s_JAL, s_WD);
 
 end structure;

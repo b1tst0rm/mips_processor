@@ -1,22 +1,30 @@
+-- extender16to32.vhd
+-------------------------------------------------------------------------
+-- DESCRIPTION: Extends a 16 bit signal to a 32 bit signal depending on sign.
+-- Uses dataflow VHDL.
+
+-- AUTHOR: Daniel Limanowski and Vishal Joel
+-------------------------------------------------------------------------
+
 library IEEE;
 use IEEE.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 entity extender16to32 is
-port( input	: in std_logic_vector(15 downto 0);         -- 16 bit input
-      sign    : in std_logic;                           -- 0 for unsigned, 1 for signed
-      output  : out std_logic_vector(31 downto 0) );    -- 32 bit extended output
+port( i_input	: in std_logic_vector(15 downto 0);    -- 16 bit input
+      i_sign    : in std_logic;                        -- 0 for unsigned, 1 for signed
+      o_output  : out std_logic_vector(31 downto 0) ); -- 32 bit extended o_output
 end extender16to32;
 
 architecture dataflow of extender16to32 is
 begin
 
     G1: for i in 0 to 15 generate
-        output(i) <= input(i);
+        o_output(i) <= i_input(i);
     end generate;
 
     G2: for i in 16 to 31 generate
-        output(i) <= sign and input(15);
+        o_output(i) <= i_sign and i_input(15);
     end generate;
 
 end dataflow;

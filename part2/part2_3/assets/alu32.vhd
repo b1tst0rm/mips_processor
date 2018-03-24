@@ -15,8 +15,8 @@ use IEEE.std_logic_1164.all;
 entity alu32 is
         port( i_A        : in  std_logic_vector(31 downto 0); -- Operand A
               i_B        : in  std_logic_vector(31 downto 0); -- Operand B
-              i_ALUOP    : in  std_logic_vector(3  downto 0); -- minimum-wdith control
-              o_F        : out std_logic_vector(31 downto 0); -- Result
+              i_ALUOP    : in  std_logic_vector(3  downto 0); -- minimum-width control
+              o_F        : out std_logic_vector(31 downto 0); -- result
               o_CarryOut : out std_logic;                     -- carry out flag
               o_Overflow : out std_logic;                     -- overflow flag
               o_Zero     : out std_logic );                   -- zero flag

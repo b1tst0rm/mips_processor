@@ -23,7 +23,7 @@ entity fetch_logic is
           i_RD1          : in std_logic_vector(31 downto 0);
           i_Zero_Flag    : in std_logic;
           o_Instruction  : out std_logic_vector(31 downto 0);
-          o_PC           : out std_logic_vector(29 downto 0) );
+          o_PC           : out std_logic_vector(31 downto 0) );
 end fetch_logic;
 
 --- Define the architecture ---
@@ -106,7 +106,7 @@ begin
     s_instruc_sl2 <= i_Instruc_Curr & "00"; -- shift left 2 bits
     s_concat_pc_instruc <= s_AddPC4_Out(31 downto 28) & s_instruc_sl2; -- 32 bit signal
 
-    o_PC <= s_PC_Out(31 downto 2); -- chop off 2 LSBs
+    o_PC <= s_PC_Out; -- to provide an out signal for testing/simulation
 
     add_PC4: full_adder_struct_nbit
         port map (s_PC_Out, s_Four, '0', s_Cout_PC4, s_AddPC4_Out);

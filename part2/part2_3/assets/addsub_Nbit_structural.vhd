@@ -9,6 +9,8 @@
 -- AUTHOR: Daniel Limanowski
 -------------------------------------------------------------------------
 
+-- TODO: Rename this to addsub_32bit_structural and force all inputs to 32bits
+
 library IEEE;
 use IEEE.std_logic_1164.all;
 
@@ -49,14 +51,24 @@ architecture structure of addsub_struct_nbit is
 
     --- Signal Declaration ---
     signal s_inv_b, s_mux_out : std_logic_vector(N-1 downto 0);
+    signal s_twoscomp_cout : std_logic;
+    signal s_twoscomp : std_logic_vector(N-1 downto 0);
+    signal s_one : std_logic_vector(31 downto 0);
+
 
 begin
--- try putting these in a process?
-inv_a: ones_comp_structural GENERIC MAP (N)
+s_one <= (0 => '1', others => '0'); -- a signal forced to 0b1
+
+-- one's complement the b input for subtraction
+inv_b: ones_comp_structural GENERIC MAP (N)
     port map(i_B, s_inv_b);
 
+-- add one to one's complement to make the B signal "two's complemented"
+add1_inv_b: full_adder_struct_nbit GENERIC MAP (N)
+    port map(s_inv_b, s_one, '0', s_twoscomp_cout, s_twoscomp);
+
 mux_sel: mux_2_1_struct GENERIC MAP (N)
-    port map(i_B, s_inv_b, i_nAdd_Sub, s_mux_out);
+    port map(i_B, s_twoscomp, i_nAdd_Sub, s_mux_out);
 
 adder: full_adder_struct_nbit GENERIC MAP (N)
     port map(i_A, s_mux_out, i_nAdd_Sub, o_Cout, o_S);
