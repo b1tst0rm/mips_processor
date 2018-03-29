@@ -146,7 +146,7 @@ architecture structure of mips_single_cycle is
 begin
     -- This needs to be here otherwise we sometimes get out of bounds due to non-memory operations.
     s_mem_addr <= 0 when (s_Mem_To_Reg = '0') else
-                         to_integer(unsigned(s_Alu_Out(31 downto 2))); -- must chop off 2 LSBs and convert to a natural address to hand to mem module
+                         to_integer(unsigned(s_Alu_Out(11 downto 2))); -- must chop off 2 LSBs and convert to a natural address to hand to mem module
 
     o_ZF <= s_ZF;
     o_PC <= s_PC;

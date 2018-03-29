@@ -98,7 +98,7 @@ architecture structural of fetch_logic is
 begin
     s_Four <= (2 => '1', others => '0'); -- hardcode "4" as argument to adder
     s_MemData_Placehold <= (others => '0'); -- we won't be writing this to mem but we do need to provide a Signal
-    s_Convert_Addr <= s_PC_Out(31 downto 2); -- chop off the 2 LSBs to conform to word addressing of mem module
+    s_Convert_Addr <= "00000000000000000000" & s_PC_Out(11 downto 2); -- chop off the 2 LSBs to conform to word addressing of mem module
     s_convert_to_nat <= to_integer(unsigned(s_Convert_Addr)); -- mem module needs a natural value
     s_IMM_Shift <= i_IMM(29 downto 0) & "00"; -- shift i_IMM left by 2 bits
     s_BEQBNE <= i_BEQ & i_BNE; -- selector for sel_BEQ_BNE

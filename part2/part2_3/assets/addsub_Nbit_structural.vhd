@@ -15,7 +15,7 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 
 entity addsub_struct_nbit is
-    generic(N : integer := 4);
+    generic(N : integer := 32);
     port( i_A         : in std_logic_vector(N-1 downto 0);
           i_B         : in std_logic_vector(N-1 downto 0);
           i_nAdd_Sub  : in std_logic; -- A+B when = '0', A-B when = '1'
@@ -71,6 +71,6 @@ mux_sel: mux_2_1_struct GENERIC MAP (N)
     port map(i_B, s_twoscomp, i_nAdd_Sub, s_mux_out);
 
 adder: full_adder_struct_nbit GENERIC MAP (N)
-    port map(i_A, s_mux_out, i_nAdd_Sub, o_Cout, o_S);
+    port map(i_A, s_mux_out, '0', o_Cout, o_S);
 
 end structure;

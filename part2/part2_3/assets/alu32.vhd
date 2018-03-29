@@ -38,7 +38,7 @@ architecture structure of alu32 is
     end component;
 
     component addsub_struct_nbit is
-        generic(N : integer := 4);
+        generic(N : integer := 32);
         port( i_A         : in std_logic_vector(N-1 downto 0);
               i_B         : in std_logic_vector(N-1 downto 0);
               i_nAdd_Sub  : in std_logic;
