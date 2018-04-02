@@ -21,6 +21,7 @@ entity mips_single_cycle is
           o_CF          : out std_logic;   -- carry flag
           o_OVF         : out std_logic;   -- overflow flag
           o_ZF          : out std_logic;   -- zero flag
+          o_JAL_OVF     : out std_logic;   -- overflow flag for JAL adder
           o_PC          : out std_logic_vector(31 downto 0) ); -- program counter (PC) (byte addressable)
 end mips_single_cycle;
 
@@ -150,6 +151,7 @@ begin
 
     o_ZF <= s_ZF;
     o_PC <= s_PC;
+    o_JAL_OVF <= s_addJAL_cout;
 
     s_ThirtyOne <= (others => '1'); -- hardcoded to 31 in binary
     s_Four <= (2 => '1', others => '0'); -- hardcode 4 for JAL adder

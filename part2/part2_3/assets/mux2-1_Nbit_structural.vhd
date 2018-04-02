@@ -20,7 +20,7 @@ end mux_2_1_struct;
 --- Define the architecture ---
 architecture structure of mux_2_1_struct is
     --- Component Declaration ---
-    component inv
+    component inv_MS
         port( i_A  : in std_logic;
               o_F  : out std_logic );
     end component;
@@ -37,23 +37,22 @@ architecture structure of mux_2_1_struct is
               o_F          : out std_logic );
     end component;
 
-    signal s_notsel        : std_logic; 
+    signal s_notsel        : std_logic;
     signal s_andy, s_andx  : std_logic_vector(N-1 downto 0);
 
 begin
-not_sel: inv -- this part doesn't need to be in GENFOR b/c it is not affected by i (constant)
-    port map ( i_A => i_SEL,
-               o_F => s_notsel );
+not_sel: inv_MS -- this part doesn't need to be in GENFOR b/c it is not affected by i (constant)
+    port map (i_SEL, s_notsel);
 
-GENFOR: for i in 0 to N-1 generate    
+GENFOR: for i in 0 to N-1 generate
     and_sel_y: and2_MS
         port map ( i_A => i_SEL,
-                   i_B => i_Y(i), 
+                   i_B => i_Y(i),
                    o_F => s_andy(i) );
 
     and_notsel_x: and2_MS
-        port map ( i_A => s_notsel, 
-                   i_B => i_X(i), 
+        port map ( i_A => s_notsel,
+                   i_B => i_X(i),
                    o_F => s_andx(i) );
 
     or_xysel: or2_MS

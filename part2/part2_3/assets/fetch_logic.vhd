@@ -76,11 +76,6 @@ architecture structural of fetch_logic is
            o_F          : out std_logic);
     end component;
 
-    component inv is -- aka NOT
-      port(i_A          : in std_logic;
-           o_F          : out std_logic);
-    end component;
-
     component sel_BEQ_BNE is
         port( i_Zero_Flag : in std_logic;
               i_Select    : in std_logic_vector(1 downto 0);

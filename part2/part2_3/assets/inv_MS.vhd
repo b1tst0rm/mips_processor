@@ -7,12 +7,12 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 
-entity inv is
+entity inv_MS is
   port(i_A          : in std_logic;
        o_F          : out std_logic);
-end inv;
+end inv_MS;
 
-architecture dataflow of inv is
+architecture dataflow of inv_MS is
 begin
 
   o_F <= not i_A;

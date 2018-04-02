@@ -28,8 +28,8 @@ architecture structure of addsub_struct_nbit is
     --- Component Declaration ---
     component ones_comp_structural is
         generic(N : integer := 32);
-        port( i_A  : in std_logic_vector(N-1 downto 0);
-              o_F  : out std_logic_vector(N-1 downto 0) );
+        port( i_Bits     : in std_logic_vector(N-1 downto 0);
+              o_OnesComp : out std_logic_vector(N-1 downto 0) );
     end component;
 
     component mux_2_1_struct is
