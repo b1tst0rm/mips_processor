@@ -145,7 +145,7 @@ architecture structure of mips_single_cycle is
     signal s_PC : std_logic_vector(31 downto 0);
 
 begin
-    -- we need to assign s_mem_addr in a process to avoid asychronous reading of
+    -- We need to assign s_mem_addr in a process to avoid asychronous reading of
     -- the data memory. Quartus Prime expects that we avoid async reading so time
     -- analysis cannot be done without this signal assignment in a process controlled
     -- by the clock. See https://alteraforum.com/forum/showthread.php?t=28242 for more
@@ -153,8 +153,11 @@ begin
     begin
         if rising_edge(i_clock) then
             -- This needs to be here otherwise we sometimes get out of bounds due to non-memory operations.
-            s_mem_addr <= 0 when (s_Mem_To_Reg = '0') else
-                          to_integer(unsigned(s_Alu_Out(11 downto 2))); -- must chop off 2 LSBs and convert to a natural address to hand to mem module
+            --if s_Mem_To_Reg = '0' then
+			--	s_mem_addr <= 0;
+			--else
+				s_mem_addr <= to_integer(unsigned(s_Alu_Out(11 downto 2))); -- must chop off 2 LSBs and convert to a natural address to hand to mem module
+			--end if;
         end if;
     end process;
     
