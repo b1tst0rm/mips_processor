@@ -151,14 +151,7 @@ begin
     -- by the clock. See https://alteraforum.com/forum/showthread.php?t=28242 for more
     process(i_clock)
     begin
-        if rising_edge(i_clock) then
-            -- This needs to be here otherwise we sometimes get out of bounds due to non-memory operations.
-            --if s_Mem_To_Reg = '0' then
-			--	s_mem_addr <= 0;
-			--else
-				s_mem_addr <= to_integer(unsigned(s_Alu_Out(11 downto 2))); -- must chop off 2 LSBs and convert to a natural address to hand to mem module
-			--end if;
-        end if;
+	    s_mem_addr <= to_integer(unsigned(s_Alu_Out(11 downto 2))); -- must chop off 2 LSBs and convert to a natural address to hand to mem module
     end process;
     
     o_ZF <= s_ZF;
