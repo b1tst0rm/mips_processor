@@ -28,12 +28,11 @@ end fetch_logic;
 
 architecture structural of fetch_logic is
     component register_32bit is
-        generic ( N : integer := 32 );
         port( i_CLK  : in std_logic;
               i_RST  : in std_logic;
-              i_WD   : in std_logic_vector(N-1 downto 0);    -- WD = write data
+              i_WD   : in std_logic_vector(31 downto 0);    -- WD = write data
               i_WE   : in std_logic;                         -- WE = write enable
-              o_Q    : out std_logic_vector(N-1 downto 0) ); -- Output requested data
+              o_Q    : out std_logic_vector(31 downto 0) ); -- Output requested data
     end component;
 
     component mem is
@@ -46,20 +45,18 @@ architecture structural of fetch_logic is
     end component;
 
     component fulladder_32bit is
-        generic(N : integer := 32);
-        port( i_A    : in std_logic_vector(N-1 downto 0);
-              i_B    : in std_logic_vector(N-1 downto 0);
+        port( i_A    : in std_logic_vector(31 downto 0);
+              i_B    : in std_logic_vector(31 downto 0);
               i_Cin  : in std_logic;
               o_Cout : out std_logic;
-              o_S    : out std_logic_vector(N-1 downto 0) );
+              o_S    : out std_logic_vector(31 downto 0) );
     end component;
 
     component mux2to1_32bit is
-        generic(N : integer := 32);
-        port( i_X   : in std_logic_vector(N-1 downto 0);
-              i_Y   : in std_logic_vector(N-1 downto 0);
+        port( i_X   : in std_logic_vector(31 downto 0);
+              i_Y   : in std_logic_vector(31 downto 0);
               i_SEL : in std_logic;
-              o_OUT   : out std_logic_vector(N-1 downto 0) );
+              o_OUT   : out std_logic_vector(31 downto 0) );
     end component;
 
     component or2_1bit is

@@ -37,12 +37,11 @@ architecture structure of alu_32bit is
     end component;
 
     component addsub_32bit is
-        generic(N : integer := 32);
-        port( i_A         : in std_logic_vector(N-1 downto 0);
-              i_B         : in std_logic_vector(N-1 downto 0);
+        port( i_A         : in std_logic_vector(31 downto 0);
+              i_B         : in std_logic_vector(31 downto 0);
               i_nAdd_Sub  : in std_logic;
               o_Cout      : out std_logic;
-              o_S         : out std_logic_vector(N-1 downto 0) );
+              o_S         : out std_logic_vector(31 downto 0) );
     end component;
 
     component slt_32bit is
@@ -113,7 +112,6 @@ begin
         port map (i_A, i_B, mux1_in);
 
     ARITH_OP: addsub_32bit
-        generic map (32)
         port map (i_A, i_B, i_ALUOP(2), s_carry, mux2_in);
 
     -- Calculate the overflow flag
