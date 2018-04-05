@@ -1,6 +1,6 @@
--- or_32.vhd
+-- and2_32bit.vhd
 -------------------------------------------------------------------------
--- DESCRIPTION: This file contains a 32 bit OR gate.
+-- DESCRIPTION: This file contains a 2-input, 32 bit AND gate.
 
 -- AUTHOR: Vishal Joel
 -------------------------------------------------------------------------
@@ -8,13 +8,15 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 
-entity or_32 is
+entity and2_32bit is
     port( i_A : in  std_logic_vector(31 downto 0);
           i_B : in  std_logic_vector(31 downto 0);
-          o_F : out std_logic_vector(31 downto 0));
-end or_32;
+          o_F : out std_logic_vector(31 downto 0) );
+end and2_32bit;
 
-architecture dataflow of or_32 is
+architecture dataflow of and2_32bit is
 begin
-    o_F <= i_A or i_B;
+
+    o_F <= i_A and i_B;
+
 end dataflow;

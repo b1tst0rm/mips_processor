@@ -1,4 +1,4 @@
--- alu32.vhd
+-- alu_32bit.vhd
 -------------------------------------------------------------------------
 -- DESCRIPTION: 32-bit (MIPS word) Arithmetic-Logical-Unit (ALU)
 -- using structural VHDL
@@ -6,13 +6,14 @@
 -- A multiplexor selects between several different instructions
 -- ALUOP is the selector for the muxes
 -- OPS supported: add/sub (signed and unsigned), slt, and, or, xor, nor, sll, srl, and sra.
+--
 -- AUTHOR: Daniel Limanowski
 -------------------------------------------------------------------------
 
 library IEEE;
 use IEEE.std_logic_1164.all;
 
-entity alu32 is
+entity alu_32bit is
         port( i_A        : in  std_logic_vector(31 downto 0); -- Operand A
               i_B        : in  std_logic_vector(31 downto 0); -- Operand B
               i_ALUOP    : in  std_logic_vector(3  downto 0); -- minimum-width control
@@ -20,24 +21,22 @@ entity alu32 is
               o_CarryOut : out std_logic;                     -- carry out flag
               o_Overflow : out std_logic;                     -- overflow flag
               o_Zero     : out std_logic );                   -- zero flag
-end alu32;
+end alu_32bit;
 
---- Define the architecture ---
-architecture structure of alu32 is
-    --- Component Declaration ---
-    component and_32 is
+architecture structure of alu_32bit is
+    component and2_32bit is
         port( i_A : in  std_logic_vector(31 downto 0);
               i_B : in  std_logic_vector(31 downto 0);
               o_F : out std_logic_vector(31 downto 0));
     end component;
 
-    component or_32 is
+    component or2_32bit is
         port( i_A : in  std_logic_vector(31 downto 0);
               i_B : in  std_logic_vector(31 downto 0);
               o_F : out std_logic_vector(31 downto 0));
     end component;
 
-    component addsub_struct_nbit is
+    component addsub_32bit is
         generic(N : integer := 32);
         port( i_A         : in std_logic_vector(N-1 downto 0);
               i_B         : in std_logic_vector(N-1 downto 0);
@@ -46,7 +45,7 @@ architecture structure of alu32 is
               o_S         : out std_logic_vector(N-1 downto 0) );
     end component;
 
-    component slt32 is
+    component slt_32bit is
         port( i_SubF    : in std_logic_vector(31 downto 0); -- result from A-B
               i_OVF     : in std_logic; -- carry from add/sub
               o_F       : out std_logic_vector(31 downto 0) );
@@ -60,19 +59,19 @@ architecture structure of alu32 is
               o_data   : out std_logic_vector(31 downto 0) );
     end component;
 
-    component nor_32 is
+    component nor2_32bit is
         port( i_A : in  std_logic_vector(31 downto 0);
               i_B : in  std_logic_vector(31 downto 0);
               o_F : out std_logic_vector(31 downto 0));
     end component;
 
-    component xor_32 is
+    component xor2_32bit is
         port( i_A : in  std_logic_vector(31 downto 0);
               i_B : in  std_logic_vector(31 downto 0);
               o_F : out std_logic_vector(31 downto 0));
     end component;
 
-    component mux_7to1 is
+    component mux7to1_32bit is
         port( i_SEL : in std_logic_vector(3 downto 0); -- 4 bit selector (ALUOP)
               i_0   : in std_logic_vector(31 downto 0); -- first of 9 inputs to mux
               i_1   : in std_logic_vector(31 downto 0);
@@ -107,13 +106,13 @@ architecture structure of alu32 is
 
 begin
 
-    AND_OP: and_32
+    AND_OP: and2_32bit
         port map (i_A, i_B, mux0_in);
 
-    OR_OP: or_32
+    OR_OP: or2_32bit
         port map (i_A, i_B, mux1_in);
 
-    ARITH_OP: addsub_struct_nbit
+    ARITH_OP: addsub_32bit
         generic map (32)
         port map (i_A, i_B, i_ALUOP(2), s_carry, mux2_in);
 
@@ -121,19 +120,19 @@ begin
     OVF_FLAG: ovf_detect
         port map (i_A(31), i_B(31), mux2_in(31), s_ovf);
 
-    SLT_OP: slt32
+    SLT_OP: slt_32bit
         port map (mux2_in, s_ovf, mux3_in);
 
     SHIFT_OP: barrel_shifter
         port map (i_B, i_ALUOP(1), i_ALUOP(0), i_A(4 downto 0), mux4_in);
 
-    NOR_OP: nor_32
+    NOR_OP: nor2_32bit
         port map (i_A, i_B, mux5_in);
 
-    XOR_OP: xor_32
+    XOR_OP: xor2_32bit
         port map (i_A, i_B, mux6_in);
 
-    SELECT_OPERATION: mux_7to1
+    SELECT_OPERATION: mux7to1_32bit
         port map (i_ALUOP, mux0_in, mux1_in, mux2_in, mux3_in, mux4_in, mux5_in, mux6_in,
             s_F);
 

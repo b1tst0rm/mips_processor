@@ -1,8 +1,7 @@
 -- zero_detect.vhd
 -------------------------------------------------------------------------
--- DESCRIPTION: Zero flag detection implementation
--- using dataflow VHDL
----
+-- DESCRIPTION: Zero flag detection implementation using dataflow VHDL
+--
 -- AUTHOR: Daniel Limanowski
 -------------------------------------------------------------------------
 
@@ -15,7 +14,9 @@ entity zero_detect is
 end zero_detect;
 
 architecture dataflow of zero_detect is
+
 begin
-o_Zero <= '1' when i_F = "00000000000000000000000000000000" else
-               '0'; -- sets signal to 1 if i_F = 0b0
+-- sets signal to 1 if i_F = 0b0
+o_Zero <= '1' when i_F = "00000000000000000000000000000000" else '0';
+
 end dataflow;

@@ -2,7 +2,7 @@
 -------------------------------------------------------------------------
 -- DESCRIPTION: 32, 32-bit register file implementation using
 -- structural VHDL
-
+--
 -- AUTHOR: Daniel Limanowski
 -------------------------------------------------------------------------
 
@@ -18,26 +18,25 @@ entity register_file is
           i_RR1       : in std_logic_vector(4 downto 0);      -- Read Register 1
           i_RR2       : in std_logic_vector(4 downto 0);      -- Read Register 2
           o_RD1       : out std_logic_vector(31 downto 0);    -- Read Data 1
-          o_RD2       : out std_logic_vector(31 downto 0) ); -- Read Data 2
+          o_RD2       : out std_logic_vector(31 downto 0) );  -- Read Data 2
 end register_file;
 
 architecture structure of register_file is
     --- Component Declaration ---
-    component register_nbit
-        generic(N : integer := 32);
+    component register_32bit
         port( i_CLK  : in std_logic;
               i_RST  : in std_logic;
-              i_WD   : in std_logic_vector(N-1 downto 0);    -- WD = write data
+              i_WD   : in std_logic_vector(31 downto 0);    -- WD = write data
               i_WE   : in std_logic;                         -- WE = write enable
-              o_Q    : out std_logic_vector(N-1 downto 0) ); -- Output requested data
+              o_Q    : out std_logic_vector(31 downto 0) ); -- Output requested data
     end component;
 
-    component decoder_5to32
+    component decode_5to32bit
         port( i_D : in std_logic_vector(4 downto 0);
               o_F : out std_logic_vector(31 downto 0) );
     end component;
 
-    component mux_32to1 is
+    component mux32to1_32bit is
         port( i_SEL : in std_logic_vector(4 downto 0); -- 5 bit selector
               i_0   : in std_logic_vector(31 downto 0); -- first of 32 inputs to mux
               i_1   : in std_logic_vector(31 downto 0);
@@ -74,13 +73,12 @@ architecture structure of register_file is
               o_F   : out std_logic_vector(31 downto 0) );  -- the selected output
     end component;
 
-    component and2_MS is
+    component and2_1bit is
       port(i_A          : in std_logic;
            i_B          : in std_logic;
            o_F          : out std_logic);
     end component;
 
--- Define some intermediary signals
 signal s_decoded : std_logic_vector(31 downto 0);
 signal s_write : std_logic_vector(31 downto 0);
 
@@ -89,22 +87,22 @@ signal s_register_data: vector32(31 downto 0);
 
 begin
 
-decode_WR: decoder_5to32
+decode_WR: decode_5to32bit
     port map(i_WR, s_decoded);
 
 generate_registers: for i in 1 to 31 generate -- skip $0 as it will be wired to 0 later
-    do_write: and2_MS
+    do_write: and2_1bit
         port map(s_decoded(i), i_REGWRITE, s_write(i)); -- only enable writing if the input WE is enabled
 
-    register_32bit: register_nbit
+    reg: register_32bit
         port map(i_CLK, i_RST, i_WD, s_write(i), s_register_data(i));
 end generate;
 
-register_0: register_nbit   -- Set $0
+reg_0: register_32bit   -- Set $0
     port map(i_CLK, '1', (others => '0'), '0', s_register_data(0)); -- RST = 1 means this will always hold 0
 
 -- Now for the two 32:1 mux mappings for RD1, RD2:
-mux_RD1: mux_32to1
+mux_RD1: mux32to1_32bit
     port map ( i_SEL => i_RR1, -- 5 bit selector
           i_0   => s_register_data(0), -- $0 = zero or '0' at all times
           i_1   => s_register_data(1),
@@ -140,7 +138,7 @@ mux_RD1: mux_32to1
           i_31  => s_register_data(31),
           o_F   => o_RD1 );  -- the selected output
 
-mux_RD2: mux_32to1
+mux_RD2: mux32to1_32bit
     port map ( i_SEL => i_RR2, -- 5 bit selector
           i_0   => s_register_data(0), -- $0 = zero or '0' at all times
           i_1   => s_register_data(1),

@@ -1,8 +1,9 @@
 -- control.vhd
 -------------------------------------------------------------------------
--- DESCRIPTION: Control logic module using dataflow VHDL
+-- DESCRIPTION: Control logic module using dataflow VHDL.
 -- Takes in the opcode and funct fields of a MIPS instruction and outputs
--- the proper settings for the modules in the processor (ALU, mux-s, register file, etc)
+-- the proper settings for the modules in the processor -
+-- (ALU, mux-s, register file, etc).
 --
 -- AUTHORS: Vishal Joel & Daniel Limanowski
 -------------------------------------------------------------------------

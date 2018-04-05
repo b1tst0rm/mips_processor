@@ -1,6 +1,6 @@
--- decoder_5to32.vhd
+-- decode_5to32bit.vhd
 -------------------------------------------------------------------------
--- DESCRIPTION: 5:32 decoder implementation using dataflow 
+-- DESCRIPTION: 5:32 decoder implementation using dataflow
 -- VHDL
 
 -- AUTHOR: Daniel Limanowski
@@ -9,12 +9,12 @@
 library IEEE;
 use IEEE.std_logic_1164.all;
 
-entity decoder_5to32 is
+entity decode_5to32bit is
     port( i_D : in std_logic_vector(4 downto 0);
-          o_F : out std_logic_vector(31 downto 0) ); 
-end decoder_5to32;
+          o_F : out std_logic_vector(31 downto 0) );
+end decode_5to32bit;
 
-architecture dataflow of decoder_5to32 is
+architecture dataflow of decode_5to32bit is
 begin
 
 with i_D select

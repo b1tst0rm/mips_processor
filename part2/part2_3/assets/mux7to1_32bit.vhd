@@ -1,17 +1,14 @@
--- mux_7to1.vhd
+-- mux7to1_32bit.vhd
 -------------------------------------------------------------------------
--- DESCRIPTION: 9:1 multiplexor implementation using dataflow
--- VHDL
-
--- For use in MIPS32 ALU (selector is the ALUOP)
-
+-- DESCRIPTION: 7:1 multiplexor implementation using dataflow VHDL.
+--
 -- AUTHOR: Daniel Limanowski
 -------------------------------------------------------------------------
 
 library IEEE;
 use IEEE.std_logic_1164.all;
 
-entity mux_7to1 is
+entity mux7to1_32bit is
     port( i_SEL : in  std_logic_vector(3 downto 0); -- 4 bit selector (ALUOP)
           i_0   : in  std_logic_vector(31 downto 0); -- first of 9 inputs to mux
           i_1   : in  std_logic_vector(31 downto 0);
@@ -21,9 +18,9 @@ entity mux_7to1 is
           i_5   : in  std_logic_vector(31 downto 0);
           i_6   : in  std_logic_vector(31 downto 0);
           o_F   : out std_logic_vector(31 downto 0) );  -- the selected output
-end mux_7to1;
+end mux7to1_32bit;
 
-architecture dataflow of mux_7to1 is
+architecture dataflow of mux7to1_32bit is
 begin
 
 with i_SEL select

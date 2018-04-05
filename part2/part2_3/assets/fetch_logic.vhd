@@ -2,7 +2,7 @@
 -------------------------------------------------------------------------
 -- DESCRIPTION: Instruction fetch logic module using structural VHDL
 -- NOTE: Reset needs to be pulsed to zero out the PC before starting during
---       a simulation.
+-- a simulation.
 -- AUTHORS: Vishal Joel & Daniel Limanowski
 -------------------------------------------------------------------------
 
@@ -26,10 +26,8 @@ entity fetch_logic is
           o_PC           : out std_logic_vector(31 downto 0) );
 end fetch_logic;
 
---- Define the architecture ---
 architecture structural of fetch_logic is
-    --- Component Declaration ---
-    component register_nbit is
+    component register_32bit is
         generic ( N : integer := 32 );
         port( i_CLK  : in std_logic;
               i_RST  : in std_logic;
@@ -47,7 +45,7 @@ architecture structural of fetch_logic is
     		   q	: out std_logic_vector((DATA_WIDTH-1) downto 0) );
     end component;
 
-    component full_adder_struct_nbit is
+    component fulladder_32bit is
         generic(N : integer := 32);
         port( i_A    : in std_logic_vector(N-1 downto 0);
               i_B    : in std_logic_vector(N-1 downto 0);
@@ -56,7 +54,7 @@ architecture structural of fetch_logic is
               o_S    : out std_logic_vector(N-1 downto 0) );
     end component;
 
-    component mux_2_1_struct is
+    component mux2to1_32bit is
         generic(N : integer := 32);
         port( i_X   : in std_logic_vector(N-1 downto 0);
               i_Y   : in std_logic_vector(N-1 downto 0);
@@ -64,13 +62,13 @@ architecture structural of fetch_logic is
               o_OUT   : out std_logic_vector(N-1 downto 0) );
     end component;
 
-    component or2_MS is
+    component or2_1bit is
       port(i_A          : in std_logic;
            i_B          : in std_logic;
            o_F          : out std_logic);
     end component;
 
-    component and2_MS is
+    component and2_1bit is
       port(i_A          : in std_logic;
            i_B          : in std_logic;
            o_F          : out std_logic);
@@ -103,34 +101,34 @@ begin
 
     o_PC <= s_PC_Out; -- to provide an out signal for testing/simulation
 
-    add_PC4: full_adder_struct_nbit
+    add_PC4: fulladder_32bit
         port map (s_PC_Out, s_Four, '0', s_Cout_PC4, s_AddPC4_Out);
 
-    add_IMM: full_adder_struct_nbit
+    add_IMM: fulladder_32bit
         port map (s_AddPC4_Out, s_IMM_Shift, '0', s_Cout_IMM, s_AddIMM_Out);
 
-    mux1: mux_2_1_struct
+    mux1: mux2to1_32bit
         port map (s_AddPC4_Out, s_AddIMM_Out, s_AND_Out, s_Mux1_Out);
 
-    mux2: mux_2_1_struct
+    mux2: mux2to1_32bit
         port map (s_Mux1_Out, s_concat_pc_instruc, s_OR_J, s_Mux2_Out);
 
-    mux3: mux_2_1_struct
+    mux3: mux2to1_32bit
         port map (s_Mux2_Out, i_RD1, i_JR, s_Mux3_Out);
 
-    or_BEQ_BNE: or2_MS
+    or_BEQ_BNE: or2_1bit
         port map (i_BEQ, i_BNE, s_OR_BEQBNE);
 
-    and_Z: and2_MS
+    and_Z: and2_1bit
         port map (s_OR_BEQBNE, s_sel_br_out, s_AND_Out);
 
     selBEQBNE: sel_BEQ_BNE
         port map (i_Zero_Flag, s_BEQBNE, s_sel_br_out);
 
-    or_J: or2_MS
+    or_J: or2_1bit
         port map (i_J, i_JAL, s_OR_J);
 
-    pc: register_nbit
+    pc: register_32bit
         port map (i_Clock, i_Reset, s_Mux3_Out, '1', s_PC_Out);
 
     instruc_mem: mem

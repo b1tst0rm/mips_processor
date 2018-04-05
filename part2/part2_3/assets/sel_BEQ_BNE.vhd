@@ -2,7 +2,7 @@
 -------------------------------------------------------------------------
 -- DESCRIPTION: Using dataflow VHDL selects the proper signal to go to
 -- the AND gate in fetch_logic.vhd
-
+--
 -- AUTHOR: Daniel Limanowski
 -------------------------------------------------------------------------
 
@@ -16,6 +16,7 @@ entity sel_BEQ_BNE is
 end sel_BEQ_BNE;
 
 architecture dataflow of sel_BEQ_BNE is
+    
 begin
     with i_Select select
         o_F <= i_Zero_Flag when "10",

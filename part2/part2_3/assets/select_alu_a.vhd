@@ -24,12 +24,11 @@ end sel_alu_a;
 --- Define the architecture ---
 architecture structure of sel_alu_a is
     --- Component Declaration ---
-    component mux_2_1_struct is
-        generic(N : integer := 32);
-        port( i_X   : in std_logic_vector(N-1 downto 0);
-              i_Y   : in std_logic_vector(N-1 downto 0);
+    component mux2to1_32bit is
+        port( i_X   : in std_logic_vector(31 downto 0);
+              i_Y   : in std_logic_vector(31 downto 0);
               i_SEL : in std_logic;
-              o_OUT   : out std_logic_vector(N-1 downto 0) );
+              o_OUT   : out std_logic_vector(31 downto 0) );
     end component;
 
     signal s_const_16, s_mux1_out : std_logic_vector(31 downto 0);
@@ -38,10 +37,10 @@ architecture structure of sel_alu_a is
 begin
     s_const_16 <= (4 => '1', others => '0'); -- set to 0d16
 
-    mux1: mux_2_1_struct
+    mux1: mux2to1_32bit
         port map(i_shamt, s_const_16, i_ALUSrc, s_mux1_out);
 
-    mux2: mux_2_1_struct
+    mux2: mux2to1_32bit
         port map(i_RD1, s_mux1_out, i_mux2_sel, o_data);
 
 end structure;

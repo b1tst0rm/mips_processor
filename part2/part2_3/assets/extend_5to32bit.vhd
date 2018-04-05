@@ -1,4 +1,4 @@
--- extender5to32.vhd
+-- extend_5to32bit.vhd
 -------------------------------------------------------------------------
 -- DESCRIPTION: Extends a 5 bit signal to a 32 bit signal depending on sign.
 -- Uses dataflow VHDL.
@@ -10,15 +10,15 @@ library IEEE;
 use IEEE.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-entity extender5to32 is
+entity extend_5to32bit is
 port( i_input   : in std_logic_vector(4 downto 0);     -- 5 bit input
       i_sign    : in std_logic;                        -- 0 for unsigned, 1 for signed
       o_output  : out std_logic_vector(31 downto 0) ); -- 32 bit extended output
-end extender5to32;
+end extend_5to32bit;
 
-architecture dataflow of extender5to32 is
+architecture dataflow of extend_5to32bit is
+
 begin
-
     G1: for i in 0 to 4 generate
         o_output(i) <= i_input(i);
     end generate;

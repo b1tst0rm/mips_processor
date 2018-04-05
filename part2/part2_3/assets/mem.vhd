@@ -1,5 +1,10 @@
--- Quartus Prime VHDL Template
--- Single-port RAM with single read/write address
+-- mem.vhd
+-------------------------------------------------------------------------
+-- DESCRIPTION: Single-port Random-Access-Memory (RAM) with single
+-- read/write address.
+--
+-- This is a Quartus Prime VHDL template.
+-------------------------------------------------------------------------
 
 library ieee;
 use ieee.std_logic_1164.all;
@@ -7,13 +12,13 @@ use ieee.numeric_std.all;
 
 entity mem is
 
-	generic 
+	generic
 	(
 		DATA_WIDTH : natural := 32;
 		ADDR_WIDTH : natural := 10
 	);
-	
-	port 
+
+	port
 	(
 		clk		: in std_logic;
 		addr	: in natural range 0 to 2**ADDR_WIDTH - 1;
@@ -21,7 +26,7 @@ entity mem is
 		we		: in std_logic := '1';
 		q		: out std_logic_vector((DATA_WIDTH -1) downto 0)
 	);
-	
+
 end mem;
 
 architecture rtl of mem is
@@ -35,7 +40,7 @@ architecture rtl of mem is
 	signal ram : memory_t;
 	attribute ram_init_file : string; -- newly added
 	attribute ram_init_file of ram : signal is "dmem.mif"; -- newly added
-	
+
 begin
 
 	process(clk)
@@ -46,6 +51,6 @@ begin
 		end if;
 	end if;
 	end process;
-	
+
 	q <= ram(addr);
 end rtl;

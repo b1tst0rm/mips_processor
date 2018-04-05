@@ -1,20 +1,20 @@
--- inv.vhd
+-- and2_1bit.vhd
 -------------------------------------------------------------------------
--- DESCRIPTION: This file contains an implementation of a 1-input NOT
--- gate.
+-- DESCRIPTION: Contains an implementation of a 2-input, 1-bit AND gate.
 -------------------------------------------------------------------------
 
 library IEEE;
 use IEEE.std_logic_1164.all;
 
-entity inv_MS is
+entity and2_1bit is
   port(i_A          : in std_logic;
+       i_B          : in std_logic;
        o_F          : out std_logic);
-end inv_MS;
+end and2_1bit;
 
-architecture dataflow of inv_MS is
+architecture dataflow of and2_1bit is
 begin
 
-  o_F <= not i_A;
+  o_F <= i_A and i_B;
 
 end dataflow;

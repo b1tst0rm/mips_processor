@@ -8,8 +8,8 @@
 -- AUTHOR: Daniel Limanowski
 -------------------------------------------------------------------------
 
--- Enter this command while simulating to load intruction memory:
--- mem load -infile {FILENAME HERE}.hex -format hex /mips_single_cycle/fetch_instruc/instruc_mem/ram
+-- Enter this command while simulating to load intruction memory (example .hex shown):
+-- mem load -infile ../part2_7/mergesort/mergesort.hex -format hex /mips_single_cycle/fetch_instruc/instruc_mem/ram
 
 library IEEE;
 use IEEE.std_logic_1164.all;
@@ -21,7 +21,6 @@ entity mips_single_cycle is
           o_CF          : out std_logic;   -- carry flag
           o_OVF         : out std_logic;   -- overflow flag
           o_ZF          : out std_logic;   -- zero flag
-          o_JAL_OVF     : out std_logic;   -- overflow flag for JAL adder
           o_PC          : out std_logic_vector(31 downto 0) ); -- program counter (PC) (byte addressable)
 end mips_single_cycle;
 
@@ -57,7 +56,7 @@ architecture structure of mips_single_cycle is
 
     component control is
         port( i_Instruction    : in std_logic_vector(31 downto 0);
-              o_Sel_ALU_A_Mux2 : out std_logic; -- set to 1 if ALUOP = 1001, 1000, or 1010
+              o_Sel_ALU_A_Mux2 : out std_logic;
               o_RegDst         : out std_logic;
               o_Mem_To_Reg     : out std_logic;
               o_ALUOP		   : out std_logic_vector(3 downto 0);
@@ -71,7 +70,7 @@ architecture structure of mips_single_cycle is
               o_JR             : out std_logic );
     end component;
 
-    component extender5to32 is
+    component extend_5to32bit is
         port( i_input   : in std_logic_vector(4 downto 0);
               i_sign    : in std_logic;
               o_output  : out std_logic_vector(31 downto 0) );
@@ -86,7 +85,7 @@ architecture structure of mips_single_cycle is
               o_data     : out std_logic_vector(31 downto 0) );
     end component;
 
-    component alu32 is
+    component alu_32bit is
         port( i_A        : in  std_logic_vector(31 downto 0);
               i_B        : in  std_logic_vector(31 downto 0);
               i_ALUOP    : in  std_logic_vector(3  downto 0);
@@ -96,7 +95,7 @@ architecture structure of mips_single_cycle is
               o_Zero     : out std_logic );
     end component;
 
-    component extender16to32 is
+    component extend_16to32bit is
         port( i_input   : in std_logic_vector(15 downto 0);
               i_sign    : in std_logic;
               o_output  : out std_logic_vector(31 downto 0) );
@@ -117,21 +116,26 @@ architecture structure of mips_single_cycle is
     		   q	: out std_logic_vector((DATA_WIDTH-1) downto 0) );
     end component;
 
-    component mux_2_1_struct is
-        generic(N : integer := 32);
-        port( i_X   : in std_logic_vector(N-1 downto 0);
-              i_Y   : in std_logic_vector(N-1 downto 0);
+    component mux2to1_32bit is
+        port( i_X   : in std_logic_vector(31 downto 0);
+              i_Y   : in std_logic_vector(31 downto 0);
               i_SEL : in std_logic;
-              o_OUT : out std_logic_vector(N-1 downto 0) );
+              o_OUT : out std_logic_vector(31 downto 0) );
     end component;
 
-    component full_adder_struct_nbit is
-        generic(N : integer := 32);
-        port( i_A    : in std_logic_vector(N-1 downto 0);
-              i_B    : in std_logic_vector(N-1 downto 0);
+    component mux2to1_5bit is
+        port( i_X   : in std_logic_vector(4 downto 0);
+              i_Y   : in std_logic_vector(4 downto 0);
+              i_SEL : in std_logic;
+              o_OUT   : out std_logic_vector(4 downto 0) );
+    end component;
+
+    component fulladder_32bit is
+        port( i_A    : in std_logic_vector(31 downto 0);
+              i_B    : in std_logic_vector(31 downto 0);
               i_Cin  : in std_logic;
               o_Cout : out std_logic;
-              o_S    : out std_logic_vector(N-1 downto 0) );
+              o_S    : out std_logic_vector(31 downto 0) );
     end component;
 
     --- Internal Signal Declaration ---
@@ -145,19 +149,12 @@ architecture structure of mips_single_cycle is
     signal s_PC : std_logic_vector(31 downto 0);
 
 begin
-    -- We need to assign s_mem_addr in a process to avoid asychronous reading of
-    -- the data memory. Quartus Prime expects that we avoid async reading so time
-    -- analysis cannot be done without this signal assignment in a process controlled
-    -- by the clock. See https://alteraforum.com/forum/showthread.php?t=28242 for more
-    process(i_clock)
-    begin
-	    s_mem_addr <= to_integer(unsigned(s_Alu_Out(11 downto 2))); -- must chop off 2 LSBs and convert to a natural address to hand to mem module
-    end process;
-    
+    -- Asychronous assignment of the memory address signal.
+    -- Must chop off 2 LSBs and convert to a natural address to hand to mem module.
+    s_mem_addr <= to_integer(unsigned(s_Alu_Out(11 downto 2)));
+
     o_ZF <= s_ZF;
     o_PC <= s_PC;
-    o_JAL_OVF <= s_addJAL_cout;
-
     s_ThirtyOne <= (others => '1'); -- hardcoded to 31 in binary
     s_Four <= (2 => '1', others => '0'); -- hardcode 4 for JAL adder
 
@@ -168,43 +165,41 @@ begin
         port map (s_Instruc, s_Sel_ALU_A_Mux2, s_RegDst, s_Mem_To_Reg, s_ALUOp,
                   s_MemWrite, s_ALUSrc, s_RegWrite, s_BEQ, s_BNE, s_J, s_JAL, s_JR);
 
-    mux_WR_Pre: mux_2_1_struct
-        generic map (N => 5)
+    mux_WR_Pre: mux2to1_5bit
         port map (s_Instruc(20 downto 16), s_Instruc(15 downto 11), s_RegDst, s_WR_Instruc);
 
-    mux_WR_Final: mux_2_1_struct
-        generic map (N => 5)
+    mux_WR_Final: mux2to1_5bit
         port map (s_WR_Instruc, s_ThirtyOne, s_JAL, s_WR);
 
     rf: register_file
         port map (i_clock, i_reset, s_WR, s_WD, s_RegWrite,
                   s_Instruc(25 downto 21), s_Instruc(20 downto 16), s_RD1, s_RD2);
 
-    extend_imm: extender16to32
+    extend_imm: extend_16to32bit
         port map (s_Instruc(15 downto 0), '1', s_IMM);
 
-    mux_RD2_IMM: mux_2_1_struct
+    mux_RD2_IMM: mux2to1_32bit
         port map (s_RD2, s_IMM, s_ALUSrc, s_ALU_B);
 
-    extend_shamt: extender5to32
+    extend_shamt: extend_5to32bit
         port map (s_Instruc(10 downto 6), '1', s_SHAMT); -- 32-bit extend the shift amount
 
     sel_a: sel_alu_a
         port map (s_ALUSrc, s_RD1, s_ALUOp, s_SHAMT, s_Sel_ALU_A_Mux2, s_ALU_A);
 
-    alu: alu32
+    alu: alu_32bit
         port map (s_ALU_A, s_ALU_B, s_ALUOp, s_ALU_Out, o_CF, o_OVF, s_ZF);
 
     data_mem: mem
         port map (i_clock, s_mem_addr, s_RD2, s_MemWrite, s_DMem_Out);
 
-    mux_Mem_To_Reg: mux_2_1_struct
+    mux_Mem_To_Reg: mux2to1_32bit
         port map (s_ALU_Out, s_DMem_Out, s_Mem_To_Reg, s_MemToReg_Mux_Out);
 
-    add_JAL: full_adder_struct_nbit
+    add_JAL: fulladder_32bit
         port map (s_PC, s_Four, '0', s_addJAL_cout, s_JAL_Add_Out); -- increment current PC by 4
 
-    mux_JAL: mux_2_1_struct
+    mux_JAL: mux2to1_32bit
         port map (s_MemToReg_Mux_Out, s_JAL_Add_Out, s_JAL, s_WD);
 
 end structure;

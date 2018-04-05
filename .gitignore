@@ -10,3 +10,4 @@ output_files/
 *.qpf
 *.qsf
 *.qws
+*.sdc
