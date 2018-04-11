@@ -94,6 +94,64 @@ architecture structure of mips_pipeline is
               o_ALUSrc      : out std_logic );
     end component;
 
+    component execution is
+        port( i_Reset       : in std_logic;
+              i_Clock       : in std_logic;
+              i_RD1         : in std_logic_vector(31 downto 0);
+              i_RD2         : in std_logic_vector(31 downto 0);
+              i_IMM         : in std_logic_vector(31 downto 0);
+              i_SHAMT       : in std_Logic_vector(31 downto 0);
+              i_WR          : in std_logic_vector(4 downto 0);
+              i_RegWriteEn  : in std_logic;
+              i_ALUOP       : in std_logic_vector(3 downto 0);
+              i_Sel_Mux2    : in std_logic;
+              i_Mem_To_Reg  : in std_logic;
+              i_MemWrite    : in std_logic;
+              i_ALUSrc      : in std_logic;
+              o_ALUOut      : out std_logic_vector(31 downto 0);
+              o_RD2         : out std_logic_vector(31 downto 0);
+              o_WR          : out std_logic_vector(4 downto 0);
+              o_Mem_To_Reg  : out std_logic;
+              o_MemWrite    : out std_logic;
+              o_RegWriteEn  : out std_logic;
+              o_OVF         : out std_logic;
+              o_ZF          : out std_logic;
+              o_CF          : out std_logic );
+    end component;
+
+    component register_EX_MEM is
+        port( i_Reset       : in std_logic;
+              i_Clock       : in std_logic;
+              i_ALUOut      : in std_logic_vector(31 downto 0);
+              i_RD2         : in std_logic_vector(31 downto 0);
+              i_WR          : in std_logic_vector(4 downto 0);
+              i_Mem_To_Reg  : in std_logic;
+              i_MemWrite    : in std_logic;
+              i_RegWriteEn  : in std_logic;
+              o_ALUOut      : out std_logic_vector(31 downto 0);
+              o_RD2         : out std_logic_vector(31 downto 0);
+              o_WR          : out std_logic_vector(4 downto 0);
+              o_Mem_To_Reg  : out std_logic;
+              o_MemWrite    : out std_logic;
+              o_RegWriteEn  : out std_logic );
+    end component;
+
+    component memory is
+        port( i_Reset       : in std_logic;
+              i_Clock       : in std_logic;
+              i_ALUOut      : in std_logic_vector(31 downto 0);
+              i_RD2         : in std_logic_vector(31 downto 0);
+              i_WR          : in std_logic_vector(4 downto 0);
+              i_Mem_To_Reg  : in std_logic;
+              i_MemWrite    : in std_logic;
+              i_RegWriteEn  : in std_logic;
+              o_ALUOut      : out std_logic_vector(31 downto 0);
+              o_WR          : out std_logic_vector(4 downto 0);
+              o_Mem_To_Reg  : out std_logic;
+              o_RegWriteEn  : out std_logic;
+              o_MemOut      : out std_logic_vector(31 downto 0) );
+    end component;
+
     --- Internal Signal Declaration ---
     -- TEMPORARY FLAGS (TODO: place in proper area when finished)
     signal s_OVF, s_ZF, s_CF : std_logic;
@@ -123,6 +181,24 @@ architecture structure of mips_pipeline is
            s_MemWrite_IDEX_Out, s_ALUSrc_IDEX_Out : std_logic;
     -- End Reg 2/3
 
+    -- Stage 3
+    signal s_ALUOut_EXMEM_In, s_RD2_EXMEM_In : std_logic_vector(31 downto 0);
+    signal s_WR_EXMEM_In : std_logic_vector(4 downto 0);
+    signal s_Mem_To_Reg_EXMEM_In, s_MemWrite_EXMEM_In, s_RegWriteEn_EXMEM_In : std_logic;
+    -- End Stage 3 Intermediary Signals
+
+    -- Reg 3/4
+    signal s_ALUOut_EXMEM_Out, s_RD2_EXMEM_Out : std_logic_vector(31 downto 0);
+    signal s_WR_EXMEM_Out : std_logic_vector(4 downto 0);
+    signal s_Mem_To_Reg_EXMEM_Out, s_MemWrite_EXMEM_Out, s_RegWriteEn_EXMEM_Out : std_logic;
+    -- End Reg 3/4
+
+    -- Stage 4
+    signal s_ALUOut_MEMWB_In, s_MemOut_MEMWB_In : std_logic_vector(31 downto 0);
+    signal s_WR_MEMWB_In : std_logic_vector(4 downto 0);
+    signal s_Mem_To_Reg_MEMWB_In, s_RegWriteEn_MEMWB_In : std_logic;
+    -- End Stage 4 Intermediary Signals
+
     -- Stage 5
     signal s_WriteData_WB_Out   : std_logic_vector(31 downto 0); -- TODO: this will eventually come from WB stage
     signal s_WriteReg_WB_Out    : std_logic_vector(4 downto 0); -- see above
@@ -130,7 +206,8 @@ architecture structure of mips_pipeline is
     -- End Stage 5 Intermediary Signals
 
 begin
-
+    -- Dummy output ports to help with debugging during simulation and also to
+    -- provide outputs for help with Quartus synthesizing
     o_ZF <= s_ZF;
     o_CF <= s_CF;
     o_OVF <= s_OVF;
@@ -169,15 +246,36 @@ begin
 ----------------------------- End ID/EX Register -------------------------------
 
 -------------------------------- EX Stage 3 ------------------------------------
--- TODO
+    stage3: execution
+        port map(i_Reset, i_Clock, s_RD1_IDEX_Out, s_RD2_IDEX_Out,
+                 s_Immediate_IDEX_Out, s_SHAMT_IDEX_Out, s_WR_IDEX_Out,
+                 s_RegWriteEn_IDEX_Out, s_ALUOP_IDEX_Out, s_Sel_Mux2_IDEX_Out,
+                 s_Mem_To_Reg_IDEX_Out, s_MemWrite_IDEX_Out, s_ALUSrc_IDEX_Out,
+                 -- END INPUTS AND BEGIN OUTPUTS
+                 s_ALUOut_EXMEM_In, s_RD2_EXMEM_In, s_WR_EXMEM_In,
+                 s_Mem_To_Reg_EXMEM_In, s_MemWrite_EXMEM_In,
+                 s_RegWriteEn_EXMEM_In, s_OVF, s_ZF, s_CF);
 -------------------------------- End EX Stage 3 --------------------------------
 
 ------------------------------ EX/MEM Register ---------------------------------
--- TODO
+    reg_3_4: register_EX_MEM
+        port map(i_Reset, i_Clock, s_ALUOut_EXMEM_In, s_RD2_EXMEM_In,
+                 s_WR_EXMEM_In, s_Mem_To_Reg_EXMEM_In, s_MemWrite_EXMEM_In,
+                 s_RegWriteEn_EXMEM_In,
+                 -- END INPUTS AND BEGIN outputs
+                 s_ALUOut_EXMEM_Out, s_RD2_EXMEM_Out,
+                 s_WR_EXMEM_Out, s_Mem_To_Reg_EXMEM_Out, s_MemWrite_EXMEM_Out,
+                 s_RegWriteEn_EXMEM_Out);
 ----------------------------- End EX/MEM Register ------------------------------
 
 ------------------------------- MEM Stage 4 ------------------------------------
--- TODO
+    stage4: memory
+        port map(i_Reset, i_Clock, s_ALUOut_EXMEM_Out, s_RD2_EXMEM_Out,
+                 s_WR_EXMEM_Out, s_Mem_To_Reg_EXMEM_Out, s_MemWrite_EXMEM_Out,
+                 s_RegWriteEn_EXMEM_Out,
+                 -- END INPUTS AND BEGIN OUTPUTS
+                 s_ALUOut_MEMWB_In, s_WR_MEMWB_In, s_Mem_To_Reg_MEMWB_In,
+                 s_RegWriteEn_MEMWB_In, s_MemOut_MEMWB_In);
 ------------------------------- End MEM Stage 4 --------------------------------
 
 ------------------------------ MEM/WB Register ---------------------------------
