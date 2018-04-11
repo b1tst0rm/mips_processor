@@ -10,8 +10,8 @@ use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
 entity register_IF_ID is
-    port( i_Clock       : in std_logic;
-          i_Reset       : in std_logic;
+    port( i_Reset       : in std_logic;
+          i_Clock       : in std_logic;
           i_Instruction : in std_logic_vector(31 downto 0);
           i_PCPlus4     : in std_logic_vector(31 downto 0);
           o_Instruction : out std_logic_vector(31 downto 0);

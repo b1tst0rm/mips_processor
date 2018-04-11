@@ -31,7 +31,7 @@ end control;
 --- Define the architecture ---
 architecture dataflow of control is
     signal op, funct : std_logic_vector(5 downto 0);
-    signal all_outputs : std_logic_vector(8 downto 0); -- 9 bit ouput "array"
+    signal all_outputs : std_logic_vector(8 downto 0); -- 9 bit output "array"
 
 begin
     process (i_Instruction, op, funct)

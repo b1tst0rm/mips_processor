@@ -1,7 +1,7 @@
 -- mips_pipeline.vhd
 -------------------------------------------------------------------------
--- DESCRIPTION: MIPS Pipeline Processor with NO hazard detection/avoidance
--- implementation using structural VHDL
+-- DESCRIPTION: MIPS Pipeline Processor implementation with NO hazard
+-- detection/avoidance
 --
 -- AUTHOR: Daniel Limanowski
 -------------------------------------------------------------------------
@@ -9,195 +9,151 @@
 -- Enter this command while simulating to load intruction memory (example .hex shown):
 -- mem load -infile {filename}.hex -format hex /mips_pipeline/fetch_instruc/instruc_mem/ram
 
+-- TODO: The plan for the organization of this top-level-entity (TLE) is to
+-- separate all stage logic and intermediary pipe registers into their own files
+-- NAMING SCHEME: STAGEN_NAME, REGISTER_NAME_NAME
+
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
 entity mips_pipeline is
-    port( i_reset       : in std_logic;    -- resets everything to initial state
-          i_clock       : in std_logic;    -- processor clock
+    port( i_Reset       : in std_logic;    -- resets everything to initial state
+          i_Clock       : in std_logic;    -- processor clock
           o_CF          : out std_logic;   -- carry flag
           o_OVF         : out std_logic;   -- overflow flag
-          o_ZF          : out std_logic;   -- zero flag
-          o_PC          : out std_logic_vector(31 downto 0) ); -- program counter (PC) (byte addressable)
+          o_ZF          : out std_logic ); -- zero flag
 end mips_pipeline;
 
 architecture structure of mips_pipeline is
-    --- Component Declaration ---
-    component register_file is
-        port( i_CLK       : in std_logic;
-              i_RST       : in std_logic;
-              i_WR        : in std_logic_vector(4 downto 0);
-              i_WD        : in std_logic_vector(31 downto 0);
-              i_REGWRITE  : in std_logic;
-              i_RR1       : in std_logic_vector(4 downto 0);
-              i_RR2       : in std_logic_vector(4 downto 0);
-              o_RD1       : out std_logic_vector(31 downto 0);
-              o_RD2       : out std_logic_vector(31 downto 0) );
+    component instruction_fetch is
+        port( i_Reset         : in std_logic;
+              i_Clock         : in std_logic;
+              i_BranchJ_Addr  : in std_logic_vector(31 downto 0);
+              i_Mux_Sel       : in std_logic;
+              o_Instruction   : out std_logic_vector(31 downto 0);
+              o_PCPlus4       : out std_logic_vector(31 downto 0) );
     end component;
 
-    component fetch_logic is
-        port( i_Clock        : in std_logic;
-              i_Reset        : in std_logic;
-              i_IMM          : in std_logic_vector(31 downto 0);
-              i_Instruc_Curr : in std_logic_vector(25 downto 0);
-              i_BEQ          : in std_logic;
-              i_BNE          : in std_logic;
-              i_J            : in std_logic;
-              i_JAL          : in std_logic;
-              i_JR           : in std_logic;
-              i_RD1          : in std_logic_vector(31 downto 0);
-              i_Zero_Flag    : in std_logic;
-              o_Instruction  : out std_logic_vector(31 downto 0);
-              o_PC           : out std_logic_vector(31 downto 0) );
+    component register_IF_ID is
+        port( i_Clock       : in std_logic;
+              i_Reset       : in std_logic;
+              i_Instruction : in std_logic_vector(31 downto 0);
+              i_PCPlus4     : in std_logic_vector(31 downto 0);
+              o_Instruction : out std_logic_vector(31 downto 0);
+              o_PCPlus4     : out std_logic_vector(31 downto 0) );
     end component;
 
-    component control is
-        port( i_Instruction    : in std_logic_vector(31 downto 0);
-              o_Sel_ALU_A_Mux2 : out std_logic;
-              o_RegDst         : out std_logic;
-              o_Mem_To_Reg     : out std_logic;
-              o_ALUOP		   : out std_logic_vector(3 downto 0);
-              o_MemWrite       : out std_logic;
-              o_ALUSrc         : out std_logic;
-              o_RegWrite       : out std_logic;
-              o_BEQ            : out std_logic;
-              o_BNE            : out std_logic;
-              o_J              : out std_logic;
-              o_JAL            : out std_logic;
-              o_JR             : out std_logic );
+    component instruction_decode is
+        port( i_Reset         : in std_logic;
+              i_Clock         : in std_logic;
+              i_Instruction   : in std_logic_vector(31 downto 0);
+              i_PCPlus4       : in std_logic_vector(31 downto 0);
+              i_WriteData     : in std_logic_vector(31 downto 0); -- comes from Writeback stage
+              i_WriteReg      : in std_logic_vector(4 downto 0);  -- comes from Writeback stage
+              i_RegWriteEn    : in std_logic;                     -- see above
+              o_BJ_Address    : out std_logic_vector(31 downto 0);
+              o_PCSrc         : out std_logic;
+              o_Immediate     : out std_logic_vector(31 downto 0);
+              o_WR            : out std_logic_vector(4 downto 0);
+              o_RegWriteEn    : out std_logic;
+              o_RD1           : out std_logic_vector(31 downto 0);
+              o_RD2           : out std_logic_vector(31 downto 0) );
     end component;
 
-    component extend_5to32bit is
-        port( i_input   : in std_logic_vector(4 downto 0);
-              i_sign    : in std_logic;
-              o_output  : out std_logic_vector(31 downto 0) );
-    end component;
-
-    component sel_alu_a is
-        port( i_ALUSrc   : in std_logic;
-              i_RD1      : in std_logic_vector(31 downto 0);
-              i_ALUOP    : in std_logic_vector(3 downto 0);
-              i_shamt    : in std_logic_vector(31 downto 0);
-              i_mux2_sel : in std_logic;
-              o_data     : out std_logic_vector(31 downto 0) );
-    end component;
-
-    component alu_32bit is
-        port( i_A        : in  std_logic_vector(31 downto 0);
-              i_B        : in  std_logic_vector(31 downto 0);
-              i_ALUOP    : in  std_logic_vector(3  downto 0);
-              o_F        : out std_logic_vector(31 downto 0);
-              o_CarryOut : out std_logic;
-              o_Overflow : out std_logic;
-              o_Zero     : out std_logic );
-    end component;
-
-    component extend_16to32bit is
-        port( i_input   : in std_logic_vector(15 downto 0);
-              i_sign    : in std_logic;
-              o_output  : out std_logic_vector(31 downto 0) );
-    end component;
-
-    -- Note: this memory, used for 1) data and 2) instructions, is WORD
-    -- addressed. As we submit a signal to the address, we need to first
-    -- cut off the 2 Least Significant Bits (LSBs) and then convert the address
-    -- to a "natural" number. All other parts of the processor are using BYTE
-    -- addressing and modules expect this. Only at the addr ports of mem modules
-    -- do we need to convert to word addressing.
-    component mem is
-    	generic ( DATA_WIDTH : natural := 32; ADDR_WIDTH : natural := 10 );
-    	port ( clk	: in std_logic;
-    		   addr	: in natural range 0 to 2**ADDR_WIDTH - 1;
-    		   data	: in std_logic_vector((DATA_WIDTH-1) downto 0);
-    		   we	: in std_logic := '1';
-    		   q	: out std_logic_vector((DATA_WIDTH-1) downto 0) );
-    end component;
-
-    component mux2to1_32bit is
-        port( i_X   : in std_logic_vector(31 downto 0);
-              i_Y   : in std_logic_vector(31 downto 0);
-              i_SEL : in std_logic;
-              o_OUT : out std_logic_vector(31 downto 0) );
-    end component;
-
-    component mux2to1_5bit is
-        port( i_X   : in std_logic_vector(4 downto 0);
-              i_Y   : in std_logic_vector(4 downto 0);
-              i_SEL : in std_logic;
-              o_OUT   : out std_logic_vector(4 downto 0) );
-    end component;
-
-    component fulladder_32bit is
-        port( i_A    : in std_logic_vector(31 downto 0);
-              i_B    : in std_logic_vector(31 downto 0);
-              i_Cin  : in std_logic;
-              o_Cout : out std_logic;
-              o_S    : out std_logic_vector(31 downto 0) );
+    component register_ID_EX is
+        port( i_Clock       : in std_logic;
+              i_Reset       : in std_logic;
+              i_RD1         : in std_logic_vector(31 downto 0);
+              i_RD2         : in std_logic_vector(31 downto 0);
+              i_IMM         : in std_logic_vector(31 downto 0);
+              i_WR          : in std_logic_vector(4 downto 0);
+              i_ALUOP       : in std_logic_vector(3 downto 0);
+              i_Sel_Mux2    : in std_logic; -- for sel_a for feeding into the alu
+              i_Mem_To_Reg  : in std_logic;
+              i_MemWrite    : in std_logic;
+              i_ALUSrc      : in std_logic;
+              o_RD1         : out std_logic_vector(31 downto 0);
+              o_RD2         : out std_logic_vector(31 downto 0);
+              o_IMM         : out std_logic_vector(31 downto 0);
+              o_WR          : out std_logic_vector(4 downto 0);
+              o_ALUOP       : out std_logic_vector(3 downto 0);
+              o_Sel_Mux2    : out std_logic;
+              o_Mem_To_Reg  : out std_logic;
+              o_MemWrite    : out std_logic;
+              o_ALUSrc      : out std_logic );
     end component;
 
     --- Internal Signal Declaration ---
-    signal s_RegDst, s_Mem_To_Reg, s_MemWrite, s_ALUSrc, s_RegWrite,
-        s_Sel_ALU_A_Mux2, s_BEQ, s_BNE, s_J, s_JAL, s_JR, s_ZF, s_addJAL_cout : std_logic;
-    signal s_ALUOp : std_logic_vector(3 downto 0);
-    signal s_Instruc, s_SHAMT, s_WD, s_RD1, s_RD2, s_IMM, s_ALU_B, s_ALU_A,
-        s_ALU_Out, s_DMem_Out, s_Four, s_JAL_Add_Out, s_MemToReg_Mux_Out : std_logic_vector(31 downto 0);
-    signal s_WR, s_WR_Instruc, s_ThirtyOne : std_logic_vector(4 downto 0);
-    signal s_mem_addr : natural range 0 to 2**10 - 1;
-    signal s_PC : std_logic_vector(31 downto 0);
+    -- TEMPORARY FLAGS (TODO: place in proper area when finished)
+    signal s_OVF, s_ZF, s_CF : std_logic;
+
+    -- Stage 1
+    signal s_branch_j_addr, s_Instruc_1, s_PCPlus4_1 : std_logic_vector(31 downto 0);
+    signal s_fetch_sel     : std_logic;
+    -- End Stage 1 Intermediary Signals
+
+    -- Reg 1/2
+    signal s_Instruc_2, s_PCPlus4_2 : std_logic_vector(31 downto 0);
+    -- End Reg 1/2
+
+    -- Stage 2
+    signal s_WriteData      : std_logic_vector(31 downto 0); -- TODO: this will eventually come from WB stage
+    signal s_WriteReg       : std_logic_vector(4 downto 0); -- see above
+    signal s_RD1_2, s_RD2_2 : std_logic_vector(31 downto 0);
+    -- End Stage 2 Intermediary Signals
+
+    -- Reg 2/3
+    -- End Reg 2/3
 
 begin
-    -- Asychronous assignment of the memory address signal.
-    -- Must chop off 2 LSBs and convert to a natural address to hand to mem module.
-    s_mem_addr <= to_integer(unsigned(s_Alu_Out(11 downto 2)));
 
     o_ZF <= s_ZF;
-    o_PC <= s_PC;
-    s_ThirtyOne <= (others => '1'); -- hardcoded to 31 in binary
-    s_Four <= (2 => '1', others => '0'); -- hardcode 4 for JAL adder
+    o_CF <= s_CF;
+    o_OVF <= s_OVF;
 
-    fetch_instruc: fetch_logic
-        port map (i_clock, i_reset, s_IMM, s_Instruc(25 downto 0), s_BEQ, s_BNE, s_J, s_JAL, s_JR, s_RD1, s_ZF, s_Instruc, s_PC);
+    -- TODO: come up with a naming scheme for the intermediary signals....
 
-    control_logic: control
-        port map (s_Instruc, s_Sel_ALU_A_Mux2, s_RegDst, s_Mem_To_Reg, s_ALUOp,
-                  s_MemWrite, s_ALUSrc, s_RegWrite, s_BEQ, s_BNE, s_J, s_JAL, s_JR);
+-------------------------------- IF Stage 1 ------------------------------------
+    stage1: instruction_fetch
+        port map (i_Reset, i_Clock, s_branch_j_addr, s_fetch_sel, s_Instruc_1, s_PCPlus4_1);
+-------------------------------- End IF Stage 1---------------------------------
 
-    mux_WR_Pre: mux2to1_5bit
-        port map (s_Instruc(20 downto 16), s_Instruc(15 downto 11), s_RegDst, s_WR_Instruc);
+------------------------------ IF/ID Register ----------------------------------
+    reg_1_2: register_IF_ID
+        port map (i_Reset, i_Clock, s_Instruc_1, s_PCPlus4_1, s_Instruc_2, s_PCPlus4_2);
+----------------------------- End IF/ID Register -------------------------------
 
-    mux_WR_Final: mux2to1_5bit
-        port map (s_WR_Instruc, s_ThirtyOne, s_JAL, s_WR);
+-------------------------------- ID Stage 2 ------------------------------------
+    stage2: instruction_decode
+        port map (i_Reset, i_Clock, s_Instruc_2, s_PCPlus4_2, s_WriteData,
+                  s_WriteReg_2, s_RegWriteEn_2, s_branch_j_addr, s_fetch_sel,
+                  s_Immediate_3, s_RD1_2, s_RD2_2);
+-------------------------------- End ID Stage 2 --------------------------------
 
-    rf: register_file
-        port map (i_clock, i_reset, s_WR, s_WD, s_RegWrite,
-                  s_Instruc(25 downto 21), s_Instruc(20 downto 16), s_RD1, s_RD2);
+------------------------------ ID/EX Register ----------------------------------
+    reg_2_3: register_ID_EX
+        port map(i_Reset, i_Clock, s_RD1_2, s_RD2_2, s_IMM_2
+----------------------------- End ID/EX Register -------------------------------
 
-    extend_imm: extend_16to32bit
-        port map (s_Instruc(15 downto 0), '1', s_IMM);
+-------------------------------- EX Stage 3 ------------------------------------
+-- TODO
+-------------------------------- End EX Stage 3 --------------------------------
 
-    mux_RD2_IMM: mux2to1_32bit
-        port map (s_RD2, s_IMM, s_ALUSrc, s_ALU_B);
+------------------------------ EX/MEM Register ---------------------------------
+-- TODO
+----------------------------- End EX/MEM Register ------------------------------
 
-    extend_shamt: extend_5to32bit
-        port map (s_Instruc(10 downto 6), '1', s_SHAMT); -- 32-bit extend the shift amount
+------------------------------- MEM Stage 4 ------------------------------------
+-- TODO
+------------------------------- End MEM Stage 4 --------------------------------
 
-    sel_a: sel_alu_a
-        port map (s_ALUSrc, s_RD1, s_ALUOp, s_SHAMT, s_Sel_ALU_A_Mux2, s_ALU_A);
+------------------------------ MEM/WB Register ---------------------------------
+-- TODO
+----------------------------- End MEM/WB Register ------------------------------
 
-    alu: alu_32bit
-        port map (s_ALU_A, s_ALU_B, s_ALUOp, s_ALU_Out, o_CF, o_OVF, s_ZF);
-
-    data_mem: mem
-        port map (i_clock, s_mem_addr, s_RD2, s_MemWrite, s_DMem_Out);
-
-    mux_Mem_To_Reg: mux2to1_32bit
-        port map (s_ALU_Out, s_DMem_Out, s_Mem_To_Reg, s_MemToReg_Mux_Out);
-
-    add_JAL: fulladder_32bit
-        port map (s_PC, s_Four, '0', s_addJAL_cout, s_JAL_Add_Out); -- increment current PC by 4
-
-    mux_JAL: mux2to1_32bit
-        port map (s_MemToReg_Mux_Out, s_JAL_Add_Out, s_JAL, s_WD);
+------------------------------- WB Stage 5 -------------------------------------
+-- TODO
+------------------------------- End WB Stage 5 ---------------------------------
 
 end structure;

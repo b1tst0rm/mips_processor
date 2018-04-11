@@ -1,7 +1,7 @@
 -- sel_BEQ_BNE.vhd
 -------------------------------------------------------------------------
 -- DESCRIPTION: Using dataflow VHDL selects the proper signal to go to
--- the AND gate in fetch_logic.vhd
+-- the AND gate in fetch_logic_pipeline.vhd
 --
 -- AUTHOR: Daniel Limanowski
 -------------------------------------------------------------------------
