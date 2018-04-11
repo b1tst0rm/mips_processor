@@ -5,19 +5,18 @@
 -- AUTHOR: Daniel Limanowski
 -------------------------------------------------------------------------
 
--- TODO: this is currently under construction and needs to be fixed/completed
-
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
 entity register_ID_EX is
-    port( i_Clock       : in std_logic;
-          i_Reset       : in std_logic;
+    port( i_Reset       : in std_logic;
+          i_Clock       : in std_logic;
           i_RD1         : in std_logic_vector(31 downto 0);
           i_RD2         : in std_logic_vector(31 downto 0);
           i_IMM         : in std_logic_vector(31 downto 0);
           i_WR          : in std_logic_vector(4 downto 0);
+          i_RegWriteEn  : in std_logic;
           i_ALUOP       : in std_logic_vector(3 downto 0);
           i_Sel_Mux2    : in std_logic; -- for sel_a for feeding into the alu
           i_Mem_To_Reg  : in std_logic;
@@ -27,6 +26,7 @@ entity register_ID_EX is
           o_RD2         : out std_logic_vector(31 downto 0);
           o_IMM         : out std_logic_vector(31 downto 0);
           o_WR          : out std_logic_vector(4 downto 0);
+          o_RegWriteEn  : out std_logic;
           o_ALUOP       : out std_logic_vector(3 downto 0);
           o_Sel_Mux2    : out std_logic;
           o_Mem_To_Reg  : out std_logic;
@@ -56,7 +56,6 @@ begin
     reg: register_Nbit
     port map (i_Clock, i_Reset, s_WD, '1', s_RD);
 
---TODO: FIX!
     o_RD1 <= s_RD(108 downto 77);
     o_RD2 <= s_RD(76 downto 45);
     o_IMM <= s_RD(44 downto 13);

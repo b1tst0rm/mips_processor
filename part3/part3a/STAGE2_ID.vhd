@@ -25,7 +25,12 @@ entity instruction_decode is
           o_WR            : out std_logic_vector(4 downto 0);
           o_RegWriteEn    : out std_logic;
           o_RD1           : out std_logic_vector(31 downto 0);
-          o_RD2           : out std_logic_vector(31 downto 0) );
+          o_RD2           : out std_logic_vector(31 downto 0);
+          o_ALUOP         : out std_logic_vector(3 downto 0);
+          o_Sel_Mux2      : out std_logic;
+          o_Mem_To_Reg    : out std_logic;
+          o_MemWrite      : out std_logic;
+          o_ALUSrc        : out std_logic );
 end instruction_decode;
 
 architecture structural of instruction_decode is
