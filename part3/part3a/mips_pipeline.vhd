@@ -52,6 +52,7 @@ architecture structure of mips_pipeline is
               i_WriteData     : in std_logic_vector(31 downto 0); -- comes from Writeback stage
               i_WriteReg      : in std_logic_vector(4 downto 0);  -- comes from Writeback stage
               i_RegWriteEn    : in std_logic;                     -- see above
+              o_SHAMT         : out std_logic_vector(31 downto 0);
               o_BJ_Address    : out std_logic_vector(31 downto 0);
               o_PCSrc         : out std_logic;
               o_Immediate     : out std_logic_vector(31 downto 0);
@@ -69,6 +70,7 @@ architecture structure of mips_pipeline is
     component register_ID_EX is
         port( i_Reset       : in std_logic;
               i_Clock       : in std_logic;
+              i_SHAMT       : in std_logic_vector(31 downto 0);
               i_RD1         : in std_logic_vector(31 downto 0);
               i_RD2         : in std_logic_vector(31 downto 0);
               i_IMM         : in std_logic_vector(31 downto 0);
@@ -79,6 +81,7 @@ architecture structure of mips_pipeline is
               i_Mem_To_Reg  : in std_logic;
               i_MemWrite    : in std_logic;
               i_ALUSrc      : in std_logic;
+              o_SHAMT       : out std_logic_vector(31 downto 0);
               o_RD1         : out std_logic_vector(31 downto 0);
               o_RD2         : out std_logic_vector(31 downto 0);
               o_IMM         : out std_logic_vector(31 downto 0);
@@ -107,13 +110,13 @@ architecture structure of mips_pipeline is
     -- Stage 2
     signal s_WriteData_IDEX_In   : std_logic_vector(31 downto 0); -- TODO: this will eventually come from WB stage
     signal s_WR_IDEX_In    : std_logic_vector(4 downto 0); -- see above
-    signal s_RD1_IDEX_In, s_RD2_IDEX_In, s_Immediate_IDEX_In : std_logic_vector(31 downto 0);
+    signal s_RD1_IDEX_In, s_RD2_IDEX_In, s_Immediate_IDEX_In, s_SHAMT_IDEX_In : std_logic_vector(31 downto 0);
     signal s_ALUOP_IDEX_In : std_logic_vector(3 downto 0);
     signal s_Sel_Mux2_IDEX_In, s_Mem_To_Reg_IDEX_In, s_MemWrite_IDEX_In, s_ALUSrc_IDEX_In, s_RegWriteEn_IDEX_In : std_logic;
     -- End Stage 2 Intermediary Signals
 
     -- Reg 2/3
-    signal s_RD1_IDEX_Out, s_RD2_IDEX_Out, s_Immediate_IDEX_Out : std_logic_vector(31 downto 0);
+    signal s_RD1_IDEX_Out, s_RD2_IDEX_Out, s_Immediate_IDEX_Out, s_SHAMT_IDEX_Out : std_logic_vector(31 downto 0);
     signal s_WR_IDEX_Out : std_logic_vector(4 downto 0);
     signal s_ALUOP_IDEX_Out : std_logic_vector(3 downto 0);
     signal s_RegWriteEn_IDEX_Out, s_Sel_Mux2_IDEX_Out, s_Mem_To_Reg_IDEX_Out,
@@ -147,7 +150,7 @@ begin
 -------------------------------- ID Stage 2 ------------------------------------
     stage2: instruction_decode
         port map (i_Reset, i_Clock, s_Instruc_IFID_Out, s_PCPlus4_IFID_Out,
-                  s_WriteData_WB_Out, s_WriteReg_WB_Out, s_RegWriteEn_WB_Out,
+                  s_WriteData_WB_Out, s_WriteReg_WB_Out, s_RegWriteEn_WB_Out, s_SHAMT_IDEX_In,
                   s_branch_j_addr, s_fetch_sel, s_Immediate_IDEX_In,
                   s_WR_IDEX_In, s_RegWriteEn_IDEX_In, s_RD1_IDEX_In,
                   s_RD2_IDEX_In, s_ALUOP_IDEX_In, s_Sel_Mux2_IDEX_In,
@@ -156,13 +159,13 @@ begin
 
 ------------------------------ ID/EX Register ----------------------------------
     reg_2_3: register_ID_EX
-        port map(i_Reset, i_Clock, s_RD1_IDEX_In, s_RD2_IDEX_In,
-                 s_Immediate_IDEX_In, s_WR_IDEX_In, s_RegWriteEn_IDEX_In, s_ALUOP_IDEX_In,
-                 s_Sel_Mux2_IDEX_In, s_Mem_To_Reg_IDEX_In, s_MemWrite_IDEX_In,
-                 s_ALUSrc_IDEX_In, s_RD1_IDEX_Out, s_RD2_IDEX_Out,
-                 s_Immediate_IDEX_Out, s_WR_IDEX_Out, s_RegWriteEn_IDEX_Out, s_ALUOP_IDEX_Out,
-                 s_Sel_Mux2_IDEX_Out, s_Mem_To_Reg_IDEX_Out,
-                 s_MemWrite_IDEX_Out, s_ALUSrc_IDEX_Out);
+        port map(i_Reset, i_Clock, s_SHAMT_IDEX_In, s_RD1_IDEX_In, s_RD2_IDEX_In,
+                 s_Immediate_IDEX_In, s_WR_IDEX_In, s_RegWriteEn_IDEX_In,
+                 s_ALUOP_IDEX_In, s_Sel_Mux2_IDEX_In, s_Mem_To_Reg_IDEX_In,
+                 s_MemWrite_IDEX_In, s_ALUSrc_IDEX_In, s_SHAMT_IDEX_Out, s_RD1_IDEX_Out,
+                 s_RD2_IDEX_Out, s_Immediate_IDEX_Out, s_WR_IDEX_Out,
+                 s_RegWriteEn_IDEX_Out, s_ALUOP_IDEX_Out, s_Sel_Mux2_IDEX_Out,
+                 s_Mem_To_Reg_IDEX_Out, s_MemWrite_IDEX_Out, s_ALUSrc_IDEX_Out);
 ----------------------------- End ID/EX Register -------------------------------
 
 -------------------------------- EX Stage 3 ------------------------------------

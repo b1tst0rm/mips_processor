@@ -19,6 +19,7 @@ entity instruction_decode is
           i_WriteData     : in std_logic_vector(31 downto 0); -- comes from Writeback stage
           i_WriteReg      : in std_logic_vector(4 downto 0);  -- comes from Writeback stage
           i_RegWriteEn    : in std_logic;                     -- see above
+          o_SHAMT         : out std_logic_vector(31 downto 0);
           o_BJ_Address    : out std_logic_vector(31 downto 0);
           o_PCSrc         : out std_logic;
           o_Immediate     : out std_logic_vector(31 downto 0);
@@ -107,7 +108,7 @@ architecture structural of instruction_decode is
                s_ALUSrc, s_RegWrite, s_BEQ, s_BNE, s_J, s_JAL, s_JR, s_PCSrc,
                s_Zero : std_logic;
     signal s_ALUOp : std_logic_vector(3 downto 0);
-    signal s_Immediate, s_RD1, s_RD2, s_BJ_Addr : std_logic_vector(31 downto 0);
+    signal s_Immediate, s_RD1, s_RD2, s_BJ_Addr, s_SHAMT : std_logic_vector(31 downto 0);
     signal s_ThirtyOne, s_WR_Passthru, s_WR : std_logic_vector(4 downto 0);
 
 begin
@@ -117,6 +118,7 @@ begin
     o_Immediate <= s_Immediate;
     o_WR <= s_WR;
     o_RegWriteEn <= s_RegWrite;
+    o_SHAMT <= s_SHAMT;
     s_ThirtyOne <= (others => '1'); -- hardcoded to 31 in binary
 
     control_logic: control
@@ -139,6 +141,9 @@ begin
 
     extend_imm: extend_16to32bit
         port map (i_Instruction(15 downto 0), '1', s_Immediate); -- sign-extend immediate
+
+    extend_shamt: extend_5to32bit
+        port map (i_Instruction(10 downto 6), '1', s_SHAMT); -- sign-extend shift amount
 
     rd1_rd2_zero : rd1_rd2_zero_detect
         port map (s_RD1, s_RD2, s_Zero);
