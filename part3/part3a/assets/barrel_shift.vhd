@@ -40,13 +40,12 @@ architecture structure of barrel_shifter is
     end component;
 
     component mux2to1_32bit is
-        generic(N : integer := 32);
-        port( i_X   : in std_logic_vector(N-1 downto 0);
-              i_Y   : in std_logic_vector(N-1 downto 0);
+        port( i_X   : in std_logic_vector(31 downto 0);
+              i_Y   : in std_logic_vector(31 downto 0);
               i_SEL : in std_logic;
-              o_OUT   : out std_logic_vector(N-1 downto 0) );
+              o_OUT   : out std_logic_vector(31 downto 0) );
     end component;
-
+    
     component reverse_order is
         port( i_data   : in std_logic_vector(31 downto 0);
               o_data   : out std_logic_vector(31 downto 0) );

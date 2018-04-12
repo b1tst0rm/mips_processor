@@ -14,12 +14,16 @@ use IEEE.numeric_std.all;
 entity memory is
     port( i_Reset       : in std_logic;
           i_Clock       : in std_logic;
+          i_PCPlus4     : in std_Logic_vector(31 downto 0);
+          i_JAL         : in std_logic;
           i_ALUOut      : in std_logic_vector(31 downto 0);
           i_RD2         : in std_logic_vector(31 downto 0);
           i_WR          : in std_logic_vector(4 downto 0);
           i_Mem_To_Reg  : in std_logic;
           i_MemWrite    : in std_logic;
           i_RegWriteEn  : in std_logic;
+          o_PCPlus4     : out std_logic_vector(31 downto 0);
+          o_JAL         : out std_logic;
           o_ALUOut      : out std_logic_vector(31 downto 0);
           o_WR          : out std_logic_vector(4 downto 0);
           o_Mem_To_Reg  : out std_logic;
@@ -48,6 +52,8 @@ architecture structural of memory is
 
 begin
     -- Output signal assignments
+    o_PCPlus4 <= i_PCPlus4;
+    o_JAL <= i_JAL;
     o_ALUOut <= i_ALUOut;
     o_WR <= i_WR;
     o_Mem_To_Reg <= i_Mem_To_Reg;

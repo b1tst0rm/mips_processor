@@ -19,6 +19,8 @@ entity instruction_decode is
           i_WriteData     : in std_logic_vector(31 downto 0); -- comes from Writeback stage
           i_WriteReg      : in std_logic_vector(4 downto 0);  -- comes from Writeback stage
           i_RegWriteEn    : in std_logic;                     -- see above
+          o_PCPlus4       : out std_logic_vector(31 downto 0);
+          o_JAL           : out std_logic;
           o_SHAMT         : out std_logic_vector(31 downto 0);
           o_BJ_Address    : out std_logic_vector(31 downto 0);
           o_PCSrc         : out std_logic;
@@ -46,7 +48,7 @@ architecture structural of instruction_decode is
               i_RD1              : in std_logic_vector(31 downto 0);
               i_PCPlus4          : in std_logic_vector(31 downto 0);
               i_IMM              : in std_logic_vector(31 downto 0);
-              o_BJ_Address      : out std_logic_vector(31 downto 0);
+              o_BJ_Address       : out std_logic_vector(31 downto 0);
               o_PCSrc            : out std_logic );
     end component;
 
@@ -107,22 +109,32 @@ architecture structural of instruction_decode is
     signal s_Sel_ALU_A_Mux2, s_RegDst, s_Mem_To_Reg, s_MemWrite,
                s_ALUSrc, s_RegWrite, s_BEQ, s_BNE, s_J, s_JAL, s_JR, s_PCSrc,
                s_Zero : std_logic;
-    signal s_ALUOp : std_logic_vector(3 downto 0);
+    signal s_ALUOP : std_logic_vector(3 downto 0);
     signal s_Immediate, s_RD1, s_RD2, s_BJ_Addr, s_SHAMT : std_logic_vector(31 downto 0);
     signal s_ThirtyOne, s_WR_Passthru, s_WR : std_logic_vector(4 downto 0);
 
 begin
 
+    o_PCPlus4 <= i_PCPlus4;
+    o_JAL <= s_JAL;
+    o_SHAMT <= s_SHAMT;
     o_BJ_Address <= s_BJ_Addr;
     o_PCSrc <= s_PCSrc;
     o_Immediate <= s_Immediate;
     o_WR <= s_WR;
     o_RegWriteEn <= s_RegWrite;
-    o_SHAMT <= s_SHAMT;
+    o_RD1 <= s_RD1;
+    o_RD2 <= s_RD2;
+    o_ALUOP <= s_ALUOP;
+    o_Sel_Mux2 <= s_Sel_ALU_A_Mux2;
+    o_Mem_To_Reg <= s_Mem_To_Reg;
+    o_MemWrite <= s_MemWrite;
+    o_ALUSrc <= s_ALUSrc;
+
     s_ThirtyOne <= (others => '1'); -- hardcoded to 31 in binary
 
     control_logic: control
-        port map (i_Instruction, s_Sel_ALU_A_Mux2, s_RegDst, s_Mem_To_Reg, s_ALUOp,
+        port map (i_Instruction, s_Sel_ALU_A_Mux2, s_RegDst, s_Mem_To_Reg, s_ALUOP,
                   s_MemWrite, s_ALUSrc, s_RegWrite, s_BEQ, s_BNE, s_J, s_JAL, s_JR);
 
     bj_logic: branch_jump_logic

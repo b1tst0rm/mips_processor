@@ -14,6 +14,8 @@ use IEEE.numeric_std.all;
 entity execution is
     port( i_Reset       : in std_logic;
           i_Clock       : in std_logic;
+          i_PCPlus4     : in std_logic_vector(31 downto 0);
+          i_JAL         : in std_logic;
           i_RD1         : in std_logic_vector(31 downto 0);
           i_RD2         : in std_logic_vector(31 downto 0);
           i_IMM         : in std_logic_vector(31 downto 0);
@@ -25,6 +27,8 @@ entity execution is
           i_Mem_To_Reg  : in std_logic;
           i_MemWrite    : in std_logic;
           i_ALUSrc      : in std_logic;
+          o_PCPlus4     : out std_logic_vector(31 downto 0);
+          o_JAL         : out std_logic;
           o_ALUOut      : out std_logic_vector(31 downto 0);
           o_RD2         : out std_logic_vector(31 downto 0);
           o_WR          : out std_logic_vector(4 downto 0);
@@ -68,6 +72,8 @@ architecture structural of execution is
 
 begin
 
+    o_PCPlus4 <= i_PCPlus4;
+    o_JAL <= i_JAL;
     o_ALUOut <= s_alu_out;
     o_RD2 <= i_RD2;
     o_WR <= i_WR;
