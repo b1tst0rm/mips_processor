@@ -121,7 +121,7 @@ begin
     o_BJ_Address <= s_BJ_Addr;
     o_PCSrc <= s_PCSrc;
     o_Immediate <= s_Immediate;
-    o_WR <= s_WR;
+    o_WR <= s_WR_Passthru;
     o_RegWriteEn <= s_RegWrite;
     o_RD1 <= s_RD1;
     o_RD2 <= s_RD2;
@@ -148,7 +148,7 @@ begin
         port map (i_WriteReg, s_ThirtyOne, s_JAL, s_WR);
 
     rf: register_file
-        port map (i_clock, i_reset, i_WriteReg, i_WriteData, i_RegWriteEn,
+        port map (i_clock, i_reset, s_WR, i_WriteData, i_RegWriteEn,
                   i_Instruction(25 downto 21), i_Instruction(20 downto 16), s_RD1, s_RD2);
 
     extend_imm: extend_16to32bit
