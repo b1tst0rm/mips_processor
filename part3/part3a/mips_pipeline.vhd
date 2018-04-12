@@ -7,7 +7,7 @@
 -------------------------------------------------------------------------
 
 -- Enter this command while simulating to load intruction memory (example .hex shown):
--- mem load -infile {filename}.hex -format hex /mips_pipeline/fetch_instruc/instruc_mem/ram
+-- mem load -infile {filename}.hex -format hex /mips_pipeline/stage1/instruc_mem/ram
 
 -- TODO: The plan for the organization of this top-level-entity (TLE) is to
 -- separate all stage logic and intermediary pipe registers into their own files
@@ -36,8 +36,8 @@ architecture structure of mips_pipeline is
     end component;
 
     component register_IF_ID is
-        port( i_Clock       : in std_logic;
-              i_Reset       : in std_logic;
+        port( i_Reset       : in std_logic;
+              i_Clock       : in std_logic;
               i_Instruction : in std_logic_vector(31 downto 0);
               i_PCPlus4     : in std_logic_vector(31 downto 0);
               o_Instruction : out std_logic_vector(31 downto 0);

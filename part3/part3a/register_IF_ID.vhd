@@ -33,14 +33,13 @@ architecture structural of register_IF_ID is
     signal s_WD, s_RD : std_logic_vector(63 downto 0);
 
 begin
+
     s_WD <= i_Instruction & i_PCPlus4; -- concatenate the 2 inputs
 
-    -- We are always writing to these staged registers so WE hardcoded to '1'
     reg: register_Nbit
-    port map (i_Clock, i_Reset, s_WD, '1', s_RD);
+        port map (i_Clock, i_Reset, s_WD, '1', s_RD);
 
     o_Instruction <= s_RD(63 downto 32);
     o_PCPlus4 <= s_RD(31 downto 0);
-
 
 end structural;
