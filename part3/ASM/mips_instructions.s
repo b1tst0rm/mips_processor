@@ -174,6 +174,13 @@ bneTest:
 
 	j bneCond                       # jump to bneCond -> test for branch not equal
 
+	# nop
+	addi $0, $0, 0
+	addi $0, $0, 0
+	addi $0, $0, 0
+	addi $0, $0, 0
+	addi $0, $0, 0
+
 bneCond:
 	bne $1, $2, bneTrue             # if ($1 != $2) -> goto bneTrue // In this case I test for false
 
@@ -185,6 +192,13 @@ bneCond:
 	addi $0, $0, 0
 
 	j bneFalse                      # bne will fail cause 0 != 0 -> hence we jump to bneFalse
+
+	# nop
+	addi $0, $0, 0
+	addi $0, $0, 0
+	addi $0, $0, 0
+	addi $0, $0, 0
+	addi $0, $0, 0
 
 bneTrue:
 	addi $1, $0, 1                  # $1 = 1 if bne succeeds
@@ -204,9 +218,25 @@ bneFalse:
 
 simpleFunc:
 	addi $2, $0, 2                  # $2 = 2
+
+	# nop
+	addi $0, $0, 0
+	addi $0, $0, 0
+	addi $0, $0, 0
+	addi $0, $0, 0
+	addi $0, $0, 0
+
 	jr $31                          # 0x000000ac + 4 = 0x000000b0
 
 loadAndStoreTest:
+	
+	# nop
+	addi $0, $0, 0
+	addi $0, $0, 0
+	addi $0, $0, 0
+	addi $0, $0, 0
+	addi $0, $0, 0
+
 	lui $1, 4097 			# 4097 = 1001 hex. The upper 16 bits is stored in $1 - Results in 0x10010000 in hex
 
 
