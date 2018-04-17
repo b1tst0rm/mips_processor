@@ -1,17 +1,13 @@
 -- mips_pipeline.vhd
 -------------------------------------------------------------------------
 -- DESCRIPTION: MIPS Pipeline Processor implementation with NO hazard
--- detection/avoidance
+-- detection/avoidance.
 --
 -- AUTHOR: Daniel Limanowski
 -------------------------------------------------------------------------
 
 -- Enter this command while simulating to load intruction memory (example .hex shown):
 -- mem load -infile {filename}.hex -format hex /mips_pipeline/stage1/instruc_mem/ram
-
--- TODO: The plan for the organization of this top-level-entity (TLE) is to
--- separate all stage logic and intermediary pipe registers into their own files
--- NAMING SCHEME: STAGEN_NAME, REGISTER_NAME_NAME
 
 library IEEE;
 use IEEE.std_logic_1164.all;
@@ -49,9 +45,10 @@ architecture structure of mips_pipeline is
               i_Clock         : in std_logic;
               i_Instruction   : in std_logic_vector(31 downto 0);
               i_PCPlus4       : in std_logic_vector(31 downto 0);
-              i_WriteData     : in std_logic_vector(31 downto 0); -- comes from Writeback stage
-              i_WriteReg      : in std_logic_vector(4 downto 0);  -- comes from Writeback stage
-              i_RegWriteEn    : in std_logic;                     -- see above
+              i_WriteData     : in std_logic_vector(31 downto 0);
+              i_WriteReg      : in std_logic_vector(4 downto 0);
+              i_RegWriteEn    : in std_logic;
+              i_JAL_WB        : in std_logic;
               o_PCPlus4       : out std_logic_vector(31 downto 0);
               o_JAL           : out std_logic;
               o_SHAMT         : out std_logic_vector(31 downto 0);
@@ -201,11 +198,11 @@ architecture structure of mips_pipeline is
               i_MemOut      : in std_logic_vector(31 downto 0);
               o_RegWriteEn  : out std_logic;
               o_WD          : out std_logic_vector(31 downto 0);
-              o_WR          : out std_logic_vector(4 downto 0) );
+              o_WR          : out std_logic_vector(4 downto 0);
+              o_JAL         : out std_logic );
     end component;
 
     --- Internal Signal Declaration ---
-    -- TEMPORARY FLAGS (TODO: place in proper area when finished)
     signal s_OVF, s_ZF, s_CF : std_logic;
 
     -- Stage 1
@@ -258,14 +255,14 @@ architecture structure of mips_pipeline is
     --End Reg 4/5
 
     -- Stage 5
-    signal s_WriteData_WB_Out   : std_logic_vector(31 downto 0); -- TODO: this will eventually come from WB stage
-    signal s_WriteReg_WB_Out    : std_logic_vector(4 downto 0); -- see above
-    signal s_RegWriteEn_WB_Out  : std_logic;
+    signal s_WriteData_WB_Out   : std_logic_vector(31 downto 0);
+    signal s_WriteReg_WB_Out    : std_logic_vector(4 downto 0);
+    signal s_RegWriteEn_WB_Out, s_JAL_WB_Out  : std_logic;
     -- End Stage 5 Intermediary Signals
 
 begin
     -- Dummy output ports to help with debugging during simulation and also to
-    -- provide outputs for help with Quartus synthesizing
+    -- provide outputs for help with Quartus synthesizing.
     o_ZF <= s_ZF;
     o_CF <= s_CF;
     o_OVF <= s_OVF;
@@ -285,9 +282,10 @@ begin
 -------------------------------- ID Stage 2 ------------------------------------
     stage2: instruction_decode
         port map (i_Reset, i_Clock, s_Instruc_IFID_Out, s_PCPlus4_IFID_Out,
-                  s_WriteData_WB_Out, s_WriteReg_WB_Out, s_RegWriteEn_WB_Out,
+                  s_WriteData_WB_Out, s_WriteReg_WB_Out, s_RegWriteEn_WB_Out, s_JAL_WB_Out,
                   -- END INPUTS AND BEGIN OUTPUTS
-                  s_PCPlus4_IDEX_In, s_JAL_IDEX_In, s_SHAMT_IDEX_In, s_branch_j_addr, s_fetch_sel, s_Immediate_IDEX_In,
+                  s_PCPlus4_IDEX_In, s_JAL_IDEX_In, s_SHAMT_IDEX_In,
+                  s_branch_j_addr, s_fetch_sel, s_Immediate_IDEX_In,
                   s_WR_IDEX_In, s_RegWriteEn_IDEX_In, s_RD1_IDEX_In,
                   s_RD2_IDEX_In, s_ALUOP_IDEX_In, s_Sel_Mux2_IDEX_In,
                   s_Mem_To_Reg_IDEX_In, s_MemWrite_IDEX_In, s_ALUSrc_IDEX_In);
@@ -296,7 +294,8 @@ begin
 -- TODO: BEGIN FIXING SIGNAL ASSIGNMENTS BELOW WITH PCPLUS4 AND JAL
 ------------------------------ ID/EX Register ----------------------------------
     reg_2_3: register_ID_EX
-        port map(i_Reset, i_Clock, s_PCPlus4_IDEX_In, s_JAL_IDEX_In, s_SHAMT_IDEX_In, s_RD1_IDEX_In, s_RD2_IDEX_In,
+        port map(i_Reset, i_Clock, s_PCPlus4_IDEX_In, s_JAL_IDEX_In,
+                 s_SHAMT_IDEX_In, s_RD1_IDEX_In, s_RD2_IDEX_In,
                  s_Immediate_IDEX_In, s_WR_IDEX_In, s_RegWriteEn_IDEX_In,
                  s_ALUOP_IDEX_In, s_Sel_Mux2_IDEX_In, s_Mem_To_Reg_IDEX_In,
                  s_MemWrite_IDEX_In, s_ALUSrc_IDEX_In,
@@ -355,7 +354,7 @@ begin
                  s_ALUOut_MEMWB_Out, s_WR_MEMWB_Out, s_Mem_To_Reg_MEMWB_Out,
                  s_RegWriteEn_MEMWB_Out, s_MemOut_MEMWB_Out,
                  -- END INPUTS AND BEGIN OUTPUTS
-                 s_RegWriteEn_WB_Out, s_WriteData_WB_Out, s_WriteReg_WB_Out);
+                 s_RegWriteEn_WB_Out, s_WriteData_WB_Out, s_WriteReg_WB_Out, s_JAL_WB_Out);
 ------------------------------- End WB Stage 5 ---------------------------------
 
 end structure;

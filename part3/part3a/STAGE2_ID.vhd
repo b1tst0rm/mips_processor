@@ -18,7 +18,8 @@ entity instruction_decode is
           i_PCPlus4       : in std_logic_vector(31 downto 0);
           i_WriteData     : in std_logic_vector(31 downto 0); -- comes from Writeback stage
           i_WriteReg      : in std_logic_vector(4 downto 0);  -- comes from Writeback stage
-          i_RegWriteEn    : in std_logic;                     -- see above
+          i_RegWriteEn    : in std_logic;                     -- comes from Writeback stage
+          i_JAL_WB        : in std_logic;                     -- comes from Writeback stage
           o_PCPlus4       : out std_logic_vector(31 downto 0);
           o_JAL           : out std_logic;
           o_SHAMT         : out std_logic_vector(31 downto 0);
@@ -145,7 +146,7 @@ begin
         port map (i_Instruction(20 downto 16), i_Instruction(15 downto 11), s_RegDst, s_WR_Passthru);
 
     mux_WR_Final: mux2to1_5bit
-        port map (i_WriteReg, s_ThirtyOne, s_JAL, s_WR);
+        port map (i_WriteReg, s_ThirtyOne, i_JAL_WB, s_WR);
 
     rf: register_file
         port map (i_clock, i_reset, s_WR, i_WriteData, i_RegWriteEn,

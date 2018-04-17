@@ -23,7 +23,8 @@ entity writeback is
           i_MemOut      : in std_logic_vector(31 downto 0);
           o_RegWriteEn  : out std_logic;
           o_WD          : out std_logic_vector(31 downto 0);
-          o_WR          : out std_logic_vector(4 downto 0) );
+          o_WR          : out std_logic_vector(4 downto 0);
+          o_JAL         : out std_logic );
 end writeback;
 
 architecture structural of writeback is
@@ -49,6 +50,7 @@ begin
     o_RegWriteEn <= i_RegWriteEn;
     o_WD <= s_mux_wb_out;
     o_WR <= i_WR;
+    o_JAL <= i_JAL;
 
     mux_mem: mux2to1_32bit
         port map(i_ALUOut, i_MemOut, i_Mem_To_Reg, s_mux_mem_out);
