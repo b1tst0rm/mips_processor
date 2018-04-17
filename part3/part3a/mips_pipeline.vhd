@@ -215,7 +215,7 @@ architecture structure of mips_pipeline is
     -- End Reg 1/2
 
     -- Stage 2
-    signal s_WriteData_IDEX_In, s_PCPlus4_IDEX_In : std_logic_vector(31 downto 0); -- TODO: this will eventually come from WB stage
+    signal s_WriteData_IDEX_In, s_PCPlus4_IDEX_In : std_logic_vector(31 downto 0);
     signal s_WR_IDEX_In    : std_logic_vector(4 downto 0); -- see above
     signal s_RD1_IDEX_In, s_RD2_IDEX_In, s_Immediate_IDEX_In, s_SHAMT_IDEX_In : std_logic_vector(31 downto 0);
     signal s_ALUOP_IDEX_In : std_logic_vector(3 downto 0);
@@ -291,7 +291,6 @@ begin
                   s_Mem_To_Reg_IDEX_In, s_MemWrite_IDEX_In, s_ALUSrc_IDEX_In);
 -------------------------------- End ID Stage 2 --------------------------------
 
--- TODO: BEGIN FIXING SIGNAL ASSIGNMENTS BELOW WITH PCPLUS4 AND JAL
 ------------------------------ ID/EX Register ----------------------------------
     reg_2_3: register_ID_EX
         port map(i_Reset, i_Clock, s_PCPlus4_IDEX_In, s_JAL_IDEX_In,

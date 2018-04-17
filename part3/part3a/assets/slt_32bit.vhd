@@ -15,14 +15,20 @@ entity slt_32bit is
 end slt_32bit;
 
 architecture dataflow of slt_32bit is
-    
+
 begin
 -- Set on less than is true when operand A - operand B is negative.
 -- This occurs in two cases: 1) Overflow flag is set to zero and MSB of the
 --                               subtraction result is 1 (negative)
 --                           2) Overflow flag is set to one (result is negative)
-o_F(0) <= i_SubF(31) when i_OVF = '0' else
-                 '1' when i_OVF = '1';
+
+
+with i_OVF select o_F(0) <=
+    i_SubF(31) when '0',
+           '1' when '1',
+           '1' when others; -- mandatory to cover all possible cases of a with-select
+
+
 o_F(31 downto 1) <= (others => '0'); -- set all other bits to '0' always
 
 end dataflow;
