@@ -1,27 +1,27 @@
--- mips_pipeline.vhd
+-- mips_pipeline_hazards.vhd
 -------------------------------------------------------------------------
--- DESCRIPTION: MIPS Pipeline Processor implementation with NO hazard
+-- DESCRIPTION: MIPS Pipeline Processor implementation with hazard
 -- detection/avoidance.
 --
 -- AUTHOR: Daniel Limanowski
 -------------------------------------------------------------------------
 
 -- Enter this command while simulating to load intruction memory (example .hex shown):
--- mem load -infile {filename}.hex -format hex /mips_pipeline/stage1/instruc_mem/ram
+-- mem load -infile {filename}.hex -format hex /mips_pipeline_hazards/stage1/instruc_mem/ram
 
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
-entity mips_pipeline is
+entity mips_pipeline_hazards is
     port( i_Reset       : in std_logic;    -- resets everything to initial state
           i_Clock       : in std_logic;    -- processor clock
           o_CF          : out std_logic;   -- carry flag
           o_OVF         : out std_logic;   -- overflow flag
           o_ZF          : out std_logic ); -- zero flag
-end mips_pipeline;
+end mips_pipeline_hazards;
 
-architecture structure of mips_pipeline is
+architecture structure of mips_pipeline_hazards is
     component instruction_fetch is
         port( i_Reset         : in std_logic;
               i_Clock         : in std_logic;
