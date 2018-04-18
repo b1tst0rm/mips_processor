@@ -17,6 +17,7 @@ use IEEE.numeric_std.all;
 entity instruction_fetch is
     port( i_Reset         : in std_logic;
           i_Clock         : in std_logic;
+          i_Stall         : in std_logic;
           i_BranchJ_Addr  : in std_logic_vector(31 downto 0);
           i_Mux_Sel       : in std_logic;
           o_Instruction   : out std_logic_vector(31 downto 0);
@@ -56,7 +57,7 @@ architecture structural of instruction_fetch is
               o_OUT   : out std_logic_vector(31 downto 0) );
     end component;
 
-    signal s_Cout_PC4 : std_logic; -- Placeholder that we never read
+    signal s_Cout_PC4, s_stall_reg : std_logic; -- Placeholder that we never read
     signal s_convert_addr : std_logic_vector(29 downto 0); -- truncating the PC address to work with our mem module that is WORD addressed
     signal s_PC_Out, s_AddPC4_Out, s_Four, s_MemData_Placehold, s_Mux_Out : std_logic_vector(31 downto 0);
     signal s_convert_to_nat : natural range 0 to 2**10 - 1;
@@ -66,7 +67,7 @@ begin
     s_MemData_Placehold <= (others => '0'); -- we won't be writing this to mem but we do need to provide a signal
     s_convert_addr <= "00000000000000000000" & s_PC_Out(11 downto 2); -- chop off the 2 LSBs to conform to word addressing of mem module
     s_convert_to_nat <= to_integer(unsigned(s_Convert_Addr)); -- mem module needs a natural value
-
+    s_stall_reg <= not i_Stall;
     o_PCPlus4 <= s_AddPC4_Out;
 
     add_PC4: fulladder_32bit
@@ -76,7 +77,7 @@ begin
         port map (s_AddPC4_Out, i_BranchJ_Addr, i_Mux_Sel, s_Mux_Out);
 
     pc: register_32bit
-        port map (i_Clock, i_Reset, s_Mux_Out, '1', s_PC_Out);
+        port map (i_Clock, i_Reset, s_Mux_Out, s_stall_reg, s_PC_Out);
 
     instruc_mem: mem
         port map (i_Clock, s_convert_to_nat, s_MemData_Placehold, '0', o_Instruction);

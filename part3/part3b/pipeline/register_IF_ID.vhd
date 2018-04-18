@@ -12,6 +12,8 @@ use IEEE.numeric_std.all;
 entity register_IF_ID is
     port( i_Reset       : in std_logic;
           i_Clock       : in std_logic;
+          i_Stall       : in std_logic; -- stalls register when high
+          i_Flush       : in std_logic; -- flushes register when high
           i_Instruction : in std_logic_vector(31 downto 0);
           i_PCPlus4     : in std_logic_vector(31 downto 0);
           o_Instruction : out std_logic_vector(31 downto 0);
@@ -31,13 +33,19 @@ architecture structural of register_IF_ID is
 
     -- 64 bit signals for write and read data
     signal s_WD, s_RD : std_logic_vector(63 downto 0);
+    signal s_stall_reg : std_logic;
 
 begin
 
-    s_WD <= i_Instruction & i_PCPlus4; -- concatenate the 2 inputs
+    s_stall_reg <= not i_Stall;
+
+    with i_Flush select s_WD <=
+        (others => '0') when '1',     -- clears the register when a flush is received
+        (i_Instruction & i_PCPlus4) when '0',            -- updates the register as usual
+        (others => '0') when others;  -- all other possibilities (compiler complains otherwise)
 
     reg: register_Nbit
-        port map (i_Clock, i_Reset, s_WD, '1', s_RD);
+        port map (i_Clock, i_Reset, s_WD, s_stall_reg, s_RD);
 
     o_Instruction <= s_RD(63 downto 32);
     o_PCPlus4 <= s_RD(31 downto 0);
