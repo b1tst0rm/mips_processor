@@ -20,8 +20,10 @@ entity branch_jump_logic is
           i_RD1              : in std_logic_vector(31 downto 0); -- for JR
           i_PCPlus4          : in std_logic_vector(31 downto 0);
           i_IMM              : in std_logic_vector(31 downto 0); -- Instruction(25 downto 0) sign-extended
-          o_BJ_Address      : out std_logic_vector(31 downto 0);
-          o_PCSrc            : out std_logic );
+          o_BJ_Address       : out std_logic_vector(31 downto 0);
+          o_PCSrc            : out std_logic;
+          o_BranchTaken      : out std_logic; -- 1 when branch (beq or bne) is taken, 0 if not taken
+          o_Branch           : out std_logic );  -- 1 if the instruction is currently beq OR bne
 end branch_jump_logic;
 
 architecture structural of branch_jump_logic is
@@ -74,6 +76,11 @@ begin
     o_BJ_Address <= s_Mux3_Out;
     o_PCSrc <= '1' when (i_BEQ = '1' or i_BNE = '1' or i_JAL = '1' or i_J = '1' or i_JR = '1') else
                '0';
+
+    o_BranchTaken <= s_AND_Out; -- when the AND_Out value is 1, this means we have branched.
+                                -- TODO: Double check to make sure this ^^^ logic is right.
+
+    o_Branch <= s_OR_BEQBNE;
 
     add_IMM: fulladder_32bit
         port map (i_PCPlus4, s_IMM_Shift, '0', s_Cout_IMM, s_AddIMM_Out);

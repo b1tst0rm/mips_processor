@@ -12,7 +12,7 @@ use IEEE.numeric_std.all;
 
 entity hazard_detection is
     port( i_Branch           : in std_logic; -- this is an OR between BEQ and BNE
-          i_Branch_Outcome   : in std_logic; -- 0 if branch not taken, 1 if branch taken (ie., beq evaluates to be equal)
+          i_BranchTaken   : in std_logic; -- 0 if branch not taken, 1 if branch taken (ie., beq evaluates to be equal)
           i_J                : in std_logic;
           i_JAL              : in std_logic;
           i_JR               : in std_logic;
@@ -32,7 +32,7 @@ architecture structural of hazard_detection is
 
 begin
 
-    process (i_Branch, i_Branch_Outcome, i_J, i_JAL, i_JR, i_IDEX_MemRead,
+    process (i_Branch, i_BranchTaken, i_J, i_JAL, i_JR, i_IDEX_MemRead,
              i_IDEX_WriteReg, i_EXMEM_WriteReg, i_IFID_RS, i_IFID_RT, i_IDEX_RT)
     begin
         if (((i_IFID_RT = i_IDEX_RT) or (i_IDEX_RT = i_IFID_RS)) and (i_IDEX_MemRead = '1')) then
@@ -40,7 +40,7 @@ begin
             o_Flush_IDEX <= '1';
             o_Stall_IFID <= '1';
             o_Stall_PC <= '1';
-        elsif ((i_JAL ='1') or (i_J = '1') or (i_Branch_Outcome = '1')) then
+        elsif ((i_JAL ='1') or (i_J = '1') or (i_BranchTaken = '1')) then
             -- A Jump-and-link Jump command has been detected OR a branch was
             -- taken, so we need to flush IF/ID register
             o_Flush_IFID <= '1';

@@ -1,9 +1,5 @@
-1) Add a signal in control unit called MemRead that is set high when a load instruction is detected
-2) Forward MemRead through IDEX
-3) Hazard goes into DECODE
-4) Forward goes into EXECUTE
-5) Implement BranchTaken
-6) Implement Branch (BEQ OR BNE)
+3) Hazard goes into DECODE - TODO: link up all its outputs...
+4) Forward goes into EXECUTE - TODO: link up all its outputs...
 
 branch, branchtaken, jr all need to come from their origin to forwarding unit
 

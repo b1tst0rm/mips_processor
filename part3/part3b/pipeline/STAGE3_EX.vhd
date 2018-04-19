@@ -14,6 +14,18 @@ use IEEE.numeric_std.all;
 entity execution is
     port( i_Reset       : in std_logic;
           i_Clock       : in std_logic;
+          i_Branch      : in std_logic;
+          i_JR          : in std_logic;
+          i_MemRead          : in std_logic;
+          i_EXMEM_RegWriteEn : in std_logic;
+          i_MEMWB_RegWriteEn : in std_logic;
+          i_EXMEM_WriteReg   : in std_logic_vector(4 downto 0);
+          i_MEMWB_WriteReg   : in std_logic_vector(4 downto 0);
+          i_IFID_RS          : in std_logic_vector(4 downto 0);
+          i_IDEX_RS          : in std_logic_vector(4 downto 0);
+          i_IFID_RT          : in std_logic_vector(4 downto 0);
+          i_IDEX_RT          : in std_logic_vector(4 downto 0);
+          i_EXMEM_RT         : in std_logic_vector(4 downto 0);
           i_PCPlus4     : in std_logic_vector(31 downto 0);
           i_JAL         : in std_logic;
           i_RD1         : in std_logic_vector(31 downto 0);
@@ -67,8 +79,32 @@ architecture structural of execution is
               o_OUT   : out std_logic_vector(31 downto 0) );
     end component;
 
+    component forwarding_logic is
+        port( i_Branch             : in std_logic;
+              i_JR                 : in std_logic;
+              i_EXMEM_RegWriteEn   : in std_logic;
+              i_MEMWB_RegWriteEn   : in std_logic;
+              i_EXMEM_WriteReg     : in std_logic_vector(4 downto 0);
+              i_MEMWB_WriteReg     : in std_logic_vector(4 downto 0);
+              i_IFID_RS            : in std_logic_vector(4 downto 0);
+              i_IDEX_RS            : in std_logic_vector(4 downto 0);
+              i_IFID_RT            : in std_logic_vector(4 downto 0);
+              i_IDEX_RT            : in std_logic_vector(4 downto 0);
+              i_EXMEM_RT           : in std_logic_vector(4 downto 0);
+              o_Forward_ALU_A_Sel1 : out std_logic;
+              o_Forward_ALU_A_Sel2 : out std_logic;
+              o_Forward_ALU_B_Sel1 : out std_logic;
+              o_Forward_ALU_B_Sel2 : out std_logic;
+              o_Forward_RS_Sel1    : out std_logic;
+              o_Forward_RS_Sel2    : out std_logic;
+              o_Forward_RT_Sel1    : out std_logic;
+              o_Forward_RT_Sel2    : out std_logic );
+    end component;
+
     signal s_a_operand, s_mux_out, s_alu_out : std_logic_vector(31 downto 0);
-    signal s_cf, s_ovf, s_zero : std_logic;
+    signal s_cf, s_ovf, s_zero, s_Forward_ALU_A_Sel1, s_Forward_ALU_A_Sel2,
+           s_Forward_ALU_B_Sel1, s_Forward_ALU_B_Sel2, s_Forward_RS_Sel1,
+           s_Forward_RS_Sel2, s_Forward_RT_Sel1, s_Forward_RT_Sel2 : std_logic;
 
 begin
 
@@ -92,5 +128,12 @@ begin
 
     alu: alu_32bit
         port map(s_a_operand, s_mux_out, i_ALUOp, s_alu_out, s_cf, s_ovf, s_zero);
+
+    forward: forwarding_logic
+        port map(i_Branch, i_JR, i_EXMEM_RegWriteEn, i_MEMWB_RegWriteEn,
+                 i_EXMEM_WriteReg, i_MEMWB_WriteReg, i_IFID_RS, i_IDEX_RS,
+                 i_IFID_RT, i_IDEX_RT, i_EXMEM_RT, s_Forward_ALU_A_Sel1,
+                 s_Forward_ALU_A_Sel2, s_Forward_ALU_B_Sel1, s_Forward_ALU_B_Sel2,
+                 s_Forward_RS_Sel1, s_Forward_RS_Sel2, s_Forward_RT_Sel1, s_Forward_RT_Sel2);
 
 end structural;

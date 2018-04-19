@@ -25,7 +25,8 @@ entity control is
           o_BNE            : out std_logic;
           o_J              : out std_logic;
           o_JAL            : out std_logic;
-          o_JR             : out std_logic );
+          o_JR             : out std_logic;
+          o_MemRead        : out std_logic ); -- set to 1 if a load instruction (which will read the memory) and 0 otherwise
 end control;
 
 --- Define the architecture ---
@@ -44,6 +45,7 @@ begin
         o_J <= '0';
         o_JAL <= '0';
         o_JR <= '0';
+        o_MemRead <= '0';
 
         if op = "000000" then
         -- R-type
@@ -101,6 +103,7 @@ begin
                 o_Sel_ALU_A_Mux2 <= '1'; -- need 16
             elsif op = "100011" then
                 all_outputs <= "100100110"; -- lw
+                o_MemRead <= '1';
             elsif op = "001110" then
                 all_outputs <= "011010110"; -- xori
             elsif op = "001101" then

@@ -43,12 +43,18 @@ architecture structure of mips_pipeline_hazards is
     component instruction_decode is
         port( i_Reset         : in std_logic;
               i_Clock         : in std_logic;
+              i_IDEX_MemRead     : in std_logic;
+              i_IDEX_WriteReg    : in std_logic_vector(4 downto 0);
+              i_EXMEM_WriteReg   : in std_logic_vector(4 downto 0);
+              i_IFID_RS          : in std_logic_vector(4 downto 0);
+              i_IFID_RT          : in std_logic_vector(4 downto 0);
+              i_IDEX_RT          : in std_logic_vector(4 downto 0);
               i_Instruction   : in std_logic_vector(31 downto 0);
               i_PCPlus4       : in std_logic_vector(31 downto 0);
-              i_WriteData     : in std_logic_vector(31 downto 0);
-              i_WriteReg      : in std_logic_vector(4 downto 0);
-              i_RegWriteEn    : in std_logic;
-              i_JAL_WB        : in std_logic;
+              i_WriteData     : in std_logic_vector(31 downto 0); -- comes from Writeback stage
+              i_WriteReg      : in std_logic_vector(4 downto 0);  -- comes from Writeback stage
+              i_RegWriteEn    : in std_logic;                     -- comes from Writeback stage
+              i_JAL_WB        : in std_logic;                     -- comes from Writeback stage
               o_PCPlus4       : out std_logic_vector(31 downto 0);
               o_JAL           : out std_logic;
               o_SHAMT         : out std_logic_vector(31 downto 0);
@@ -63,12 +69,17 @@ architecture structure of mips_pipeline_hazards is
               o_Sel_Mux2      : out std_logic;
               o_Mem_To_Reg    : out std_logic;
               o_MemWrite      : out std_logic;
-              o_ALUSrc        : out std_logic );
+              o_ALUSrc        : out std_logic;
+              o_BranchTaken   : out std_logic; -- to be hooked up to hazard/forwarding
+              o_Branch        : out std_logic; -- to be hooked up to hazard/forwarding
+              o_MemRead       : out std_logic ); -- to be sent thru idex
     end component;
 
     component register_ID_EX is
         port( i_Reset       : in std_logic;
               i_Clock       : in std_logic;
+              i_Flush       : in std_logic; -- Flushes register when high
+              i_MemRead     : in std_logic;
               i_PCPlus4     : in std_logic_vector(31 downto 0);
               i_JAL         : in std_logic;
               i_SHAMT       : in std_logic_vector(31 downto 0);
@@ -78,10 +89,11 @@ architecture structure of mips_pipeline_hazards is
               i_WR          : in std_logic_vector(4 downto 0);
               i_RegWriteEn  : in std_logic;
               i_ALUOP       : in std_logic_vector(3 downto 0);
-              i_Sel_Mux2    : in std_logic;
+              i_Sel_Mux2    : in std_logic; -- for sel_a for feeding into the alu
               i_Mem_To_Reg  : in std_logic;
               i_MemWrite    : in std_logic;
               i_ALUSrc      : in std_logic;
+              o_MemRead     : out std_logic;
               o_PCPlus4     : out std_logic_vector(31 downto 0);
               o_JAL         : out std_logic;
               o_SHAMT       : out std_logic_vector(31 downto 0);
@@ -100,6 +112,18 @@ architecture structure of mips_pipeline_hazards is
     component execution is
         port( i_Reset       : in std_logic;
               i_Clock       : in std_logic;
+              i_Branch      : in std_logic;
+              i_JR          : in std_logic;
+              i_MemRead          : in std_logic;
+              i_EXMEM_RegWriteEn : in std_logic;
+              i_MEMWB_RegWriteEn : in std_logic;
+              i_EXMEM_WriteReg   : in std_logic_vector(4 downto 0);
+              i_MEMWB_WriteReg   : in std_logic_vector(4 downto 0);
+              i_IFID_RS          : in std_logic_vector(4 downto 0);
+              i_IDEX_RS          : in std_logic_vector(4 downto 0);
+              i_IFID_RT          : in std_logic_vector(4 downto 0);
+              i_IDEX_RT          : in std_logic_vector(4 downto 0);
+              i_EXMEM_RT         : in std_logic_vector(4 downto 0);
               i_PCPlus4     : in std_logic_vector(31 downto 0);
               i_JAL         : in std_logic;
               i_RD1         : in std_logic_vector(31 downto 0);
@@ -205,6 +229,9 @@ architecture structure of mips_pipeline_hazards is
     --- Internal Signal Declaration ---
     signal s_OVF, s_ZF, s_CF : std_logic;
 
+    -- FORWARDING/HAZARD --
+    signal s_FLUSH_IDEX : std_logic;
+
     -- Stage 1
     signal s_branch_j_addr, s_Instruc_IFID_In, s_PCPlus4_IFID_In : std_logic_vector(31 downto 0);
     signal s_fetch_sel     : std_logic;
@@ -219,7 +246,7 @@ architecture structure of mips_pipeline_hazards is
     signal s_WR_IDEX_In    : std_logic_vector(4 downto 0); -- see above
     signal s_RD1_IDEX_In, s_RD2_IDEX_In, s_Immediate_IDEX_In, s_SHAMT_IDEX_In : std_logic_vector(31 downto 0);
     signal s_ALUOP_IDEX_In : std_logic_vector(3 downto 0);
-    signal s_Sel_Mux2_IDEX_In, s_Mem_To_Reg_IDEX_In, s_MemWrite_IDEX_In, s_ALUSrc_IDEX_In, s_RegWriteEn_IDEX_In, s_JAL_IDEX_In : std_logic;
+    signal s_Sel_Mux2_IDEX_In, s_Mem_To_Reg_IDEX_In, s_MemWrite_IDEX_In, s_ALUSrc_IDEX_In, s_RegWriteEn_IDEX_In, s_JAL_IDEX_In, s_BranchTaken_Stage2, s_Branch_Stage2, s_MemRead_IDEX_In : std_logic;
     -- End Stage 2 Intermediary Signals
 
     -- Reg 2/3
@@ -227,7 +254,7 @@ architecture structure of mips_pipeline_hazards is
     signal s_WR_IDEX_Out : std_logic_vector(4 downto 0);
     signal s_ALUOP_IDEX_Out : std_logic_vector(3 downto 0);
     signal s_RegWriteEn_IDEX_Out, s_Sel_Mux2_IDEX_Out, s_Mem_To_Reg_IDEX_Out,
-           s_MemWrite_IDEX_Out, s_ALUSrc_IDEX_Out, s_JAL_IDEX_Out : std_logic;
+           s_MemWrite_IDEX_Out, s_ALUSrc_IDEX_Out, s_JAL_IDEX_Out, s_MemRead_IDEX_Out : std_logic;
     -- End Reg 2/3
 
     -- Stage 3
@@ -288,18 +315,18 @@ begin
                   s_branch_j_addr, s_fetch_sel, s_Immediate_IDEX_In,
                   s_WR_IDEX_In, s_RegWriteEn_IDEX_In, s_RD1_IDEX_In,
                   s_RD2_IDEX_In, s_ALUOP_IDEX_In, s_Sel_Mux2_IDEX_In,
-                  s_Mem_To_Reg_IDEX_In, s_MemWrite_IDEX_In, s_ALUSrc_IDEX_In);
+                  s_Mem_To_Reg_IDEX_In, s_MemWrite_IDEX_In, s_ALUSrc_IDEX_In, s_BranchTaken_Stage2, s_Branch_Stage2, s_MemRead_IDEX_In);
 -------------------------------- End ID Stage 2 --------------------------------
 
 ------------------------------ ID/EX Register ----------------------------------
     reg_2_3: register_ID_EX
-        port map(i_Reset, i_Clock, s_PCPlus4_IDEX_In, s_JAL_IDEX_In,
+        port map(i_Reset, i_Clock, s_FLUSH_IDEX, s_MemRead_IDEX_In, s_PCPlus4_IDEX_In, s_JAL_IDEX_In,
                  s_SHAMT_IDEX_In, s_RD1_IDEX_In, s_RD2_IDEX_In,
                  s_Immediate_IDEX_In, s_WR_IDEX_In, s_RegWriteEn_IDEX_In,
                  s_ALUOP_IDEX_In, s_Sel_Mux2_IDEX_In, s_Mem_To_Reg_IDEX_In,
                  s_MemWrite_IDEX_In, s_ALUSrc_IDEX_In,
                  -- END INPUTS AND BEGIN OUTPUTS
-                 s_PCPlus4_IDEX_Out, s_JAL_IDEX_Out, s_SHAMT_IDEX_Out, s_RD1_IDEX_Out,
+                 s_MemRead_IDEX_Out, s_PCPlus4_IDEX_Out, s_JAL_IDEX_Out, s_SHAMT_IDEX_Out, s_RD1_IDEX_Out,
                  s_RD2_IDEX_Out, s_Immediate_IDEX_Out, s_WR_IDEX_Out,
                  s_RegWriteEn_IDEX_Out, s_ALUOP_IDEX_Out, s_Sel_Mux2_IDEX_Out,
                  s_Mem_To_Reg_IDEX_Out, s_MemWrite_IDEX_Out, s_ALUSrc_IDEX_Out);
