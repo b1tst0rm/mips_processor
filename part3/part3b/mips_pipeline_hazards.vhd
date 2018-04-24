@@ -25,6 +25,7 @@ architecture structure of mips_pipeline_hazards is
     component instruction_fetch is
         port( i_Reset         : in std_logic;
               i_Clock         : in std_logic;
+              i_Stall         : in std_logic;
               i_BranchJ_Addr  : in std_logic_vector(31 downto 0);
               i_Mux_Sel       : in std_logic;
               o_Instruction   : out std_logic_vector(31 downto 0);
@@ -34,6 +35,8 @@ architecture structure of mips_pipeline_hazards is
     component register_IF_ID is
         port( i_Reset       : in std_logic;
               i_Clock       : in std_logic;
+              i_Flush       : in std_logic;
+              i_Stall       : in std_logic;
               i_Instruction : in std_logic_vector(31 downto 0);
               i_PCPlus4     : in std_logic_vector(31 downto 0);
               o_Instruction : out std_logic_vector(31 downto 0);
@@ -41,42 +44,42 @@ architecture structure of mips_pipeline_hazards is
     end component;
 
     component instruction_decode is
-        port( i_Reset         : in std_logic;
-              i_Clock         : in std_logic;
+        port( i_Reset            : in std_logic;
+              i_Clock            : in std_logic;
               i_IDEX_MemRead     : in std_logic;
               i_IDEX_WriteReg    : in std_logic_vector(4 downto 0);
               i_EXMEM_WriteReg   : in std_logic_vector(4 downto 0);
               i_IFID_RS          : in std_logic_vector(4 downto 0);
               i_IFID_RT          : in std_logic_vector(4 downto 0);
               i_IDEX_RT          : in std_logic_vector(4 downto 0);
-              i_Instruction   : in std_logic_vector(31 downto 0);
-              i_PCPlus4       : in std_logic_vector(31 downto 0);
-              i_WriteData     : in std_logic_vector(31 downto 0); -- comes from Writeback stage
-              i_WriteReg      : in std_logic_vector(4 downto 0);  -- comes from Writeback stage
-              i_RegWriteEn    : in std_logic;                     -- comes from Writeback stage
-              i_JAL_WB        : in std_logic;                     -- comes from Writeback stage
-              o_FLUSH_IFID    : out std_logic;
-              o_FLUSH_IDEX    : out std_logic;
-              o_STALL_IFID    : out std_logic;
-              o_STALL_PC      : out std_logic;
-              o_PCPlus4       : out std_logic_vector(31 downto 0);
-              o_JAL           : out std_logic;
-              o_SHAMT         : out std_logic_vector(31 downto 0);
-              o_BJ_Address    : out std_logic_vector(31 downto 0);
-              o_PCSrc         : out std_logic;
-              o_Immediate     : out std_logic_vector(31 downto 0);
-              o_WR            : out std_logic_vector(4 downto 0);
-              o_RegWriteEn    : out std_logic;
-              o_RD1           : out std_logic_vector(31 downto 0);
-              o_RD2           : out std_logic_vector(31 downto 0);
-              o_ALUOP         : out std_logic_vector(3 downto 0);
-              o_Sel_Mux2      : out std_logic;
-              o_Mem_To_Reg    : out std_logic;
-              o_MemWrite      : out std_logic;
-              o_ALUSrc        : out std_logic;
-              o_BranchTaken   : out std_logic; -- to be hooked up to hazard/forwarding
-              o_Branch        : out std_logic; -- to be hooked up to hazard/forwarding
-              o_MemRead       : out std_logic ); -- to be sent thru idex
+              i_Instruction      : in std_logic_vector(31 downto 0);
+              i_PCPlus4          : in std_logic_vector(31 downto 0);
+              i_WriteData        : in std_logic_vector(31 downto 0);
+              i_WriteReg         : in std_logic_vector(4 downto 0);
+              i_RegWriteEn       : in std_logic;
+              i_JAL_WB           : in std_logic;
+              o_FLUSH_IFID       : out std_logic;
+              o_FLUSH_IDEX       : out std_logic;
+              o_STALL_IFID       : out std_logic;
+              o_STALL_PC         : out std_logic;
+              o_PCPlus4          : out std_logic_vector(31 downto 0);
+              o_JAL              : out std_logic;
+              o_SHAMT            : out std_logic_vector(31 downto 0);
+              o_BJ_Address       : out std_logic_vector(31 downto 0);
+              o_PCSrc            : out std_logic;
+              o_Immediate        : out std_logic_vector(31 downto 0);
+              o_WR               : out std_logic_vector(4 downto 0);
+              o_RegWriteEn       : out std_logic;
+              o_RD1              : out std_logic_vector(31 downto 0);
+              o_RD2              : out std_logic_vector(31 downto 0);
+              o_ALUOP            : out std_logic_vector(3 downto 0);
+              o_Sel_Mux2         : out std_logic;
+              o_Mem_To_Reg       : out std_logic;
+              o_MemWrite         : out std_logic;
+              o_ALUSrc           : out std_logic;
+              o_BranchTaken      : out std_logic;
+              o_Branch           : out std_logic;
+              o_MemRead          : out std_logic );
     end component;
 
     component register_ID_EX is
@@ -300,26 +303,65 @@ begin
 
 -------------------------------- IF Stage 1 ------------------------------------
     stage1: instruction_fetch
-        port map (i_Reset, i_Clock, s_branch_j_addr, s_fetch_sel,
-                  s_Instruc_IFID_In, s_PCPlus4_IFID_In);
+      port map ( i_Reset         => i_Reset,
+                 i_Clock         => i_Clock,
+                 i_Stall_PC      => TODO,
+                 i_BranchJ_Addr  => s_branch_j_addr,
+                 i_Mux_Sel       => s_fetch_sel,
+                 o_Instruction   => s_Instruc_IFID_In,
+                 o_PCPlus4       => s_PCPlus4_IFID_In );
 -------------------------------- End IF Stage 1---------------------------------
 
 ------------------------------ IF/ID Register ----------------------------------
     reg_1_2: register_IF_ID
-        port map (i_Reset, i_Clock, s_Instruc_IFID_In, s_PCPlus4_IFID_In,
-                  s_Instruc_IFID_Out, s_PCPlus4_IFID_Out);
+      port map (i_Reset       => i_Reset,
+                i_Clock       => i_Clock,
+                i_Flush       => TODO,
+                i_Stall       => TODO,
+                i_Instruction => s_Instruc_IFID_In,
+                i_PCPlus4     => s_PCPlus4_IFID_In,
+                o_Instruction => s_Instruc_IFID_Out,
+                o_PCPlus4     => s_PCPlus4_IFID_Out );
 ----------------------------- End IF/ID Register -------------------------------
 
 -------------------------------- ID Stage 2 ------------------------------------
     stage2: instruction_decode
-        port map (i_Reset, i_Clock, s_Instruc_IFID_Out, s_PCPlus4_IFID_Out,
-                  s_WriteData_WB_Out, s_WriteReg_WB_Out, s_RegWriteEn_WB_Out, s_JAL_WB_Out,
-                  -- END INPUTS AND BEGIN OUTPUTS
-                  s_PCPlus4_IDEX_In, s_JAL_IDEX_In, s_SHAMT_IDEX_In,
-                  s_branch_j_addr, s_fetch_sel, s_Immediate_IDEX_In,
-                  s_WR_IDEX_In, s_RegWriteEn_IDEX_In, s_RD1_IDEX_In,
-                  s_RD2_IDEX_In, s_ALUOP_IDEX_In, s_Sel_Mux2_IDEX_In,
-                  s_Mem_To_Reg_IDEX_In, s_MemWrite_IDEX_In, s_ALUSrc_IDEX_In, s_BranchTaken_Stage2, s_Branch_Stage2, s_MemRead_IDEX_In);
+      port map (i_Reset            => i_Reset,
+                i_Clock            => i_Clock,
+                i_IDEX_MemRead     => TODO,
+                i_IDEX_WriteReg    => TODO,
+                i_EXMEM_WriteReg   => TODO,
+                i_IFID_RS          => TODO,
+                i_IFID_RT          => TODO,
+                i_IDEX_RT          => TODO,
+                i_Instruction      => s_Instruc_IFID_Out,
+                i_PCPlus4          => s_PCPlus4_IFID_Out,
+                i_WriteData        => s_WriteData_WB_Out,
+                i_WriteReg         => s_WriteReg_WB_Out,
+                i_RegWriteEn       => s_RegWriteEn_WB_Out,
+                i_JAL_WB           => s_JAL_WB_Out,
+                o_FLUSH_IFID       => TODO,
+                o_FLUSH_IDEX       => TODO,
+                o_STALL_IFID       => TODO,
+                o_STALL_PC         => TODO,
+                o_PCPlus4          => s_PCPlus4_IDEX_In,
+                o_JAL              => s_JAL_IDEX_In,
+                o_SHAMT            => s_SHAMT_IDEX_In,
+                o_BJ_Address       => s_branch_j_addr,
+                o_PCSrc            => s_fetch_sel, -- TODO: Could this be named more appropriately?
+                o_Immediate        => s_Immediate_IDEX_In,
+                o_WR               => s_WR_IDEX_In,
+                o_RegWriteEn       => s_RegWriteEn_IDEX_In,
+                o_RD1              => s_RD1_IDEX_In,
+                o_RD2              => s_RD2_IDEX_In,
+                o_ALUOP            => s_ALUOP_IDEX_In,
+                o_Sel_Mux2         => s_Sel_Mux2_IDEX_In,
+                o_Mem_To_Reg       => s_Mem_To_Reg_IDEX_In,
+                o_MemWrite         => s_MemWrite_IDEX_In,
+                o_ALUSrc           => s_ALUSrc_IDEX_In,
+                o_BranchTaken      => s_BranchTaken_Stage2,
+                o_Branch           => s_Branch_Stage2,
+                o_MemRead          => s_MemRead_IDEX_In );
 -------------------------------- End ID Stage 2 --------------------------------
 
 ------------------------------ ID/EX Register ----------------------------------

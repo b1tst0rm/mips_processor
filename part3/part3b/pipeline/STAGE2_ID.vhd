@@ -12,42 +12,42 @@ use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
 
 entity instruction_decode is
-    port( i_Reset         : in std_logic;
-          i_Clock         : in std_logic;
+    port( i_Reset            : in std_logic;
+          i_Clock            : in std_logic;
           i_IDEX_MemRead     : in std_logic;
           i_IDEX_WriteReg    : in std_logic_vector(4 downto 0);
           i_EXMEM_WriteReg   : in std_logic_vector(4 downto 0);
           i_IFID_RS          : in std_logic_vector(4 downto 0);
           i_IFID_RT          : in std_logic_vector(4 downto 0);
           i_IDEX_RT          : in std_logic_vector(4 downto 0);
-          i_Instruction   : in std_logic_vector(31 downto 0);
-          i_PCPlus4       : in std_logic_vector(31 downto 0);
-          i_WriteData     : in std_logic_vector(31 downto 0); -- comes from Writeback stage
-          i_WriteReg      : in std_logic_vector(4 downto 0);  -- comes from Writeback stage
-          i_RegWriteEn    : in std_logic;                     -- comes from Writeback stage
-          i_JAL_WB        : in std_logic;                     -- comes from Writeback stage
-          o_FLUSH_IFID    : out std_logic;
-          o_FLUSH_IDEX    : out std_logic;
-          o_STALL_IFID    : out std_logic;
-          o_STALL_PC      : out std_logic;
-          o_PCPlus4       : out std_logic_vector(31 downto 0);
-          o_JAL           : out std_logic;
-          o_SHAMT         : out std_logic_vector(31 downto 0);
-          o_BJ_Address    : out std_logic_vector(31 downto 0);
-          o_PCSrc         : out std_logic;
-          o_Immediate     : out std_logic_vector(31 downto 0);
-          o_WR            : out std_logic_vector(4 downto 0);
-          o_RegWriteEn    : out std_logic;
-          o_RD1           : out std_logic_vector(31 downto 0);
-          o_RD2           : out std_logic_vector(31 downto 0);
-          o_ALUOP         : out std_logic_vector(3 downto 0);
-          o_Sel_Mux2      : out std_logic;
-          o_Mem_To_Reg    : out std_logic;
-          o_MemWrite      : out std_logic;
-          o_ALUSrc        : out std_logic;
-          o_BranchTaken   : out std_logic; -- to be hooked up to hazard/forwarding
-          o_Branch        : out std_logic; -- to be hooked up to hazard/forwarding
-          o_MemRead       : out std_logic ); -- to be sent thru idex
+          i_Instruction      : in std_logic_vector(31 downto 0);
+          i_PCPlus4          : in std_logic_vector(31 downto 0);
+          i_WriteData        : in std_logic_vector(31 downto 0); -- comes from Writeback stage
+          i_WriteReg         : in std_logic_vector(4 downto 0);  -- comes from Writeback stage
+          i_RegWriteEn       : in std_logic;                     -- comes from Writeback stage
+          i_JAL_WB           : in std_logic;                     -- comes from Writeback stage
+          o_FLUSH_IFID       : out std_logic;
+          o_FLUSH_IDEX       : out std_logic;
+          o_STALL_IFID       : out std_logic;
+          o_STALL_PC         : out std_logic;
+          o_PCPlus4          : out std_logic_vector(31 downto 0);
+          o_JAL              : out std_logic;
+          o_SHAMT            : out std_logic_vector(31 downto 0);
+          o_BJ_Address       : out std_logic_vector(31 downto 0);
+          o_PCSrc            : out std_logic;
+          o_Immediate        : out std_logic_vector(31 downto 0);
+          o_WR               : out std_logic_vector(4 downto 0);
+          o_RegWriteEn       : out std_logic;
+          o_RD1              : out std_logic_vector(31 downto 0);
+          o_RD2              : out std_logic_vector(31 downto 0);
+          o_ALUOP            : out std_logic_vector(3 downto 0);
+          o_Sel_Mux2         : out std_logic;
+          o_Mem_To_Reg       : out std_logic;
+          o_MemWrite         : out std_logic;
+          o_ALUSrc           : out std_logic;
+          o_BranchTaken      : out std_logic; -- to be hooked up to hazard/forwarding
+          o_Branch           : out std_logic; -- to be hooked up to hazard/forwarding
+          o_MemRead          : out std_logic ); -- to be sent thru idex
 end instruction_decode;
 
 architecture structural of instruction_decode is

@@ -17,7 +17,7 @@ use IEEE.numeric_std.all;
 entity instruction_fetch is
     port( i_Reset         : in std_logic;
           i_Clock         : in std_logic;
-          i_Stall         : in std_logic;
+          i_Stall_PC      : in std_logic;
           i_BranchJ_Addr  : in std_logic_vector(31 downto 0);
           i_Mux_Sel       : in std_logic;
           o_Instruction   : out std_logic_vector(31 downto 0);
@@ -67,7 +67,7 @@ begin
     s_MemData_Placehold <= (others => '0'); -- we won't be writing this to mem but we do need to provide a signal
     s_convert_addr <= "00000000000000000000" & s_PC_Out(11 downto 2); -- chop off the 2 LSBs to conform to word addressing of mem module
     s_convert_to_nat <= to_integer(unsigned(s_Convert_Addr)); -- mem module needs a natural value
-    s_stall_reg <= not i_Stall;
+    s_stall_reg <= not i_Stall_PC;
     o_PCPlus4 <= s_AddPC4_Out;
 
     add_PC4: fulladder_32bit
