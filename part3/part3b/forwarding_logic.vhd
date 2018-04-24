@@ -2,7 +2,6 @@
 -------------------------------------------------------------------------
 -- DESCRIPTION: Unit that processes forwarding for data hazard avoidance.
 -- This unit sits in the EX (Execute) stage of a MIPS Pipelined processor.
---
 -------------------------------------------------------------------------
 
 library IEEE;

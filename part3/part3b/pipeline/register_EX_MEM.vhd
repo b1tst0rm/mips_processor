@@ -12,6 +12,8 @@ use IEEE.numeric_std.all;
 entity register_EX_MEM is
     port( i_Reset       : in std_logic;
           i_Clock       : in std_logic;
+          i_Flush       : in std_logic;
+          i_Stall       : in std_logic;
           i_PCPlus4     : in std_logic_vector(31 downto 0);
           i_JAL         : in std_logic;
           i_ALUOut      : in std_logic_vector(31 downto 0);
@@ -43,13 +45,19 @@ architecture structural of register_EX_MEM is
 
     -- 72 bit signals for write and read data
     signal s_WD, s_RD : std_logic_vector(104 downto 0);
+    signal s_stall_reg : std_logic;
 
 begin
-    s_WD <= i_PCPlus4 & i_JAL & i_ALUOut & i_RD2 & i_WR & i_Mem_To_Reg & i_MemWrite & i_RegWriteEn; -- concat the signals
 
-    -- We are always writing to these staged registers so WE hardcoded to '1'
+    s_stall_reg <= not i_Stall;
+
+    with i_Flush select s_WD <=
+        (others => '0') when '1',     -- clears the register when a flush is received
+        (i_PCPlus4 & i_JAL & i_ALUOut & i_RD2 & i_WR & i_Mem_To_Reg & i_MemWrite & i_RegWriteEn) when '0', -- updates the register as usual
+        (others => '0') when others;  -- all other possibilities (compiler complains otherwise)
+
     reg: register_Nbit
-    port map (i_Clock, i_Reset, s_WD, '1', s_RD);
+        port map (i_Clock, i_Reset, s_WD, s_stall_reg, s_RD);
 
     o_PCPlus4 <= s_RD(104 downto 73);
     o_JAL <= s_RD(72);

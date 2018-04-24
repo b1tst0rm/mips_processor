@@ -55,6 +55,10 @@ architecture structure of mips_pipeline_hazards is
               i_WriteReg      : in std_logic_vector(4 downto 0);  -- comes from Writeback stage
               i_RegWriteEn    : in std_logic;                     -- comes from Writeback stage
               i_JAL_WB        : in std_logic;                     -- comes from Writeback stage
+              o_FLUSH_IFID    : out std_logic;
+              o_FLUSH_IDEX    : out std_logic;
+              o_STALL_IFID    : out std_logic;
+              o_STALL_PC      : out std_logic;
               o_PCPlus4       : out std_logic_vector(31 downto 0);
               o_JAL           : out std_logic;
               o_SHAMT         : out std_logic_vector(31 downto 0);
@@ -260,7 +264,7 @@ architecture structure of mips_pipeline_hazards is
     -- Stage 3
     signal s_ALUOut_EXMEM_In, s_RD2_EXMEM_In, s_PCPlus4_EXMEM_In : std_logic_vector(31 downto 0);
     signal s_WR_EXMEM_In : std_logic_vector(4 downto 0);
-    signal s_Mem_To_Reg_EXMEM_In, s_MemWrite_EXMEM_In, s_RegWriteEn_EXMEM_In, s_JAL_EXMEM_In : std_logic;
+    signal s_Mem_To_Reg_EXMEM_In, s_MemWrite_EXMEM_In       , s_RegWriteEn_EXMEM_In, s_JAL_EXMEM_In : std_logic;
     -- End Stage 3 Intermediary Signals
 
     -- Reg 3/4

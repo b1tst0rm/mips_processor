@@ -26,6 +26,10 @@ entity instruction_decode is
           i_WriteReg      : in std_logic_vector(4 downto 0);  -- comes from Writeback stage
           i_RegWriteEn    : in std_logic;                     -- comes from Writeback stage
           i_JAL_WB        : in std_logic;                     -- comes from Writeback stage
+          o_FLUSH_IFID    : out std_logic;
+          o_FLUSH_IDEX    : out std_logic;
+          o_STALL_IFID    : out std_logic;
+          o_STALL_PC      : out std_logic;
           o_PCPlus4       : out std_logic_vector(31 downto 0);
           o_JAL           : out std_logic;
           o_SHAMT         : out std_logic_vector(31 downto 0);
@@ -147,6 +151,10 @@ architecture structural of instruction_decode is
 
 begin
 
+    o_FLUSH_IFID <= s_FLUSH_IFID;
+    o_FLUSH_IDEX <= s_FLUSH_IDEX;
+    o_STALL_IFID <= s_STALL_IFID;
+    o_STALL_PC <= s_STALL_PC;
     o_PCPlus4 <= i_PCPlus4;
     o_JAL <= s_JAL;
     o_SHAMT <= s_SHAMT;

@@ -12,8 +12,8 @@ use IEEE.numeric_std.all;
 entity register_IF_ID is
     port( i_Reset       : in std_logic;
           i_Clock       : in std_logic;
-          i_Stall       : in std_logic; -- stalls register when high
           i_Flush       : in std_logic; -- flushes register when high
+          i_Stall       : in std_logic; -- stalls register when high
           i_Instruction : in std_logic_vector(31 downto 0);
           i_PCPlus4     : in std_logic_vector(31 downto 0);
           o_Instruction : out std_logic_vector(31 downto 0);

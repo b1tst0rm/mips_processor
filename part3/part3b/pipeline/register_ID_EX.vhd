@@ -4,7 +4,7 @@
 --
 -- AUTHOR: Daniel Limanowski
 -------------------------------------------------------------------------
-
+-- TODO: needs to support branch signal
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
@@ -13,6 +13,7 @@ entity register_ID_EX is
     port( i_Reset       : in std_logic;
           i_Clock       : in std_logic;
           i_Flush       : in std_logic; -- Flushes register when high
+          i_Stall       : in std_logic;
           i_MemRead     : in std_logic;
           i_PCPlus4     : in std_logic_vector(31 downto 0);
           i_JAL         : in std_logic;
@@ -56,19 +57,21 @@ architecture structural of register_ID_EX is
 
     -- 109 bit signals for write and read data
     signal s_WD, s_RD : std_logic_vector(175 downto 0);
+    signal s_stall_reg : std_logic;
 
 begin
+
+    s_stall_reg <= not i_Stall;
 
     with i_Flush select s_WD <=
         (others => '0') when '1',     -- clears the register when a flush is received
         (i_MemRead & i_PCPlus4 & i_JAL & i_SHAMT & i_RD1 & i_RD2 & i_IMM & i_WR &
             i_RegWriteEn & i_ALUOP & i_Sel_Mux2 & i_Mem_To_Reg &
-            i_MemWrite & i_ALUSrc) when '0',  -- updates the register as usual
+            i_MemWrite & i_ALUSrc) when '0',            -- updates the register as usual
         (others => '0') when others;  -- all other possibilities (compiler complains otherwise)
 
-    -- We are always writing to these staged registers so WE hardcoded to '1'
     reg: register_Nbit
-    port map (i_Clock, i_Reset, s_WD, '1', s_RD);
+        port map (i_Clock, i_Reset, s_WD, s_stall_reg, s_RD);
 
     o_MemRead <= s_RD(175);
     o_PCPlus4 <= s_RD(174 downto 143);
