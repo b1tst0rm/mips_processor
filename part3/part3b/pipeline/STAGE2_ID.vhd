@@ -14,6 +14,12 @@ use IEEE.numeric_std.all;
 entity instruction_decode is
     port( i_Reset            : in std_logic;
           i_Clock            : in std_logic;
+          i_Forward_RS_Sel1  : in std_logic;
+          i_Forward_RS_Sel2  : in std_logic;
+          i_Forward_RT_Sel1  : in std_logic;
+          i_Forward_RT_Sel2  : in std_logic;
+          i_WB_Data          : in std_logic_vector(31 downto 0);
+          i_EXMEM_ALUOut     : in std_logic_vector(31 downto 0);
           i_IDEX_MemRead     : in std_logic;
           i_IDEX_WriteReg    : in std_logic_vector(4 downto 0);
           i_EXMEM_WriteReg   : in std_logic_vector(4 downto 0);
@@ -26,6 +32,7 @@ entity instruction_decode is
           i_WriteReg         : in std_logic_vector(4 downto 0);  -- comes from Writeback stage
           i_RegWriteEn       : in std_logic;                     -- comes from Writeback stage
           i_JAL_WB           : in std_logic;                     -- comes from Writeback stage
+          o_Instruction      : out std_logic_vector(31 downto 0); -- for hazard/forwarding (to get RS/RT)
           o_FLUSH_IFID       : out std_logic;
           o_FLUSH_IDEX       : out std_logic;
           o_STALL_IFID       : out std_logic;
@@ -141,13 +148,21 @@ architecture structural of instruction_decode is
               o_Stall_PC         : out std_logic );
     end component;
 
+    component mux2to1_32bit is
+        port( i_X   : in std_logic_vector(31 downto 0);
+              i_Y   : in std_logic_vector(31 downto 0);
+              i_SEL : in std_logic;
+              o_OUT   : out std_logic_vector(31 downto 0) );
+    end component;
+
     --- Intermediary Signals ---
     signal s_Sel_ALU_A_Mux2, s_RegDst, s_Mem_To_Reg, s_MemWrite,
            s_ALUSrc, s_RegWrite, s_BEQ, s_BNE, s_J, s_JAL, s_JR, s_PCSrc,
            s_Zero, s_MemRead, s_BranchTaken, s_Branch, s_FLUSH_IFID,
            s_FLUSH_IDEX, s_STALL_IFID, s_STALL_PC : std_logic;
     signal s_ALUOP : std_logic_vector(3 downto 0);
-    signal s_Immediate, s_RD1, s_RD2, s_BJ_Addr, s_SHAMT : std_logic_vector(31 downto 0);
+    signal s_Immediate, s_RD1, s_RD2, s_BJ_Addr, s_SHAMT, s_Forward_RS,
+           s_Forward_RT, s_RS_Data_Final, s_RT_Data_Final : std_logic_vector(31 downto 0);
     signal s_ThirtyOne, s_WR_Passthru, s_WR : std_logic_vector(4 downto 0);
 
 begin
@@ -164,8 +179,8 @@ begin
     o_Immediate <= s_Immediate;
     o_WR <= s_WR_Passthru;
     o_RegWriteEn <= s_RegWrite;
-    o_RD1 <= s_RD1;
-    o_RD2 <= s_RD2;
+    o_RD1 <= s_RS_Data_Final;
+    o_RD2 <= s_RT_Data_Final;
     o_ALUOP <= s_ALUOP;
     o_Sel_Mux2 <= s_Sel_ALU_A_Mux2;
     o_Mem_To_Reg <= s_Mem_To_Reg;
@@ -175,6 +190,7 @@ begin
     o_Branch <= s_Branch;
     o_JR <= s_JR;
     o_MemRead <= s_MemRead;
+    o_Instruction <= i_Instruction;
 
     s_ThirtyOne <= (others => '1'); -- hardcoded to 31 in binary
 
@@ -196,6 +212,19 @@ begin
     rf: register_file
         port map (i_clock, i_reset, s_WR, i_WriteData, i_RegWriteEn,
                   i_Instruction(25 downto 21), i_Instruction(20 downto 16), s_RD1, s_RD2);
+
+    -- Now we determine if we pass along actual RD1/RD2 or their forwarded counterparts using muxes:
+    mux_Forward_RS: mux2to1_32bit
+        port map(i_WB_Data, i_EXMEM_ALUOut, i_Forward_RS_Sel2, s_Forward_RS);
+
+    mux_Forward_RT: mux2to1_32bit
+        port map(i_WB_Data, i_EXMEM_ALUOut, i_Forward_RT_Sel2, s_Forward_RT);
+
+    mux_Final_RS: mux2to1_32bit
+        port map(s_RD1, s_Forward_RS, i_Forward_RS_Sel1, s_RS_Data_Final);
+
+    mux_Final_RT: mux2to1_32bit
+        port map(s_RD2, s_Forward_RT, i_Forward_RT_Sel1, s_RT_Data_Final);
 
     extend_imm: extend_16to32bit
         port map (i_Instruction(15 downto 0), '1', s_Immediate); -- sign-extend immediate

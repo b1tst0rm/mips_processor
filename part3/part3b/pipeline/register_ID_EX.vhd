@@ -28,6 +28,8 @@ entity register_ID_EX is
           i_Mem_To_Reg  : in std_logic;
           i_MemWrite    : in std_logic;
           i_ALUSrc      : in std_logic;
+          i_Instruction : in std_logic_vector(31 downto 0);
+          o_Instruction : out std_logic_vector(31 downto 0);
           o_MemRead     : out std_logic;
           o_PCPlus4     : out std_logic_vector(31 downto 0);
           o_JAL         : out std_logic;
@@ -47,7 +49,7 @@ end register_ID_EX;
 architecture structural of register_ID_EX is
 
     component register_Nbit is
-        generic ( N : integer := 176 );
+        generic ( N : integer := 208 );
         port ( i_CLK  : in std_logic;
                i_RST  : in std_logic;
                i_WD   : in std_logic_vector(N-1 downto 0);    -- WD = write data
@@ -56,7 +58,7 @@ architecture structural of register_ID_EX is
     end component;
 
     -- 109 bit signals for write and read data
-    signal s_WD, s_RD : std_logic_vector(175 downto 0);
+    signal s_WD, s_RD : std_logic_vector(207 downto 0);
     signal s_stall_reg : std_logic;
 
 begin
@@ -65,7 +67,7 @@ begin
 
     with i_Flush select s_WD <=
         (others => '0') when '1',     -- clears the register when a flush is received
-        (i_MemRead & i_PCPlus4 & i_JAL & i_SHAMT & i_RD1 & i_RD2 & i_IMM & i_WR &
+        (i_Instruction & i_MemRead & i_PCPlus4 & i_JAL & i_SHAMT & i_RD1 & i_RD2 & i_IMM & i_WR &
             i_RegWriteEn & i_ALUOP & i_Sel_Mux2 & i_Mem_To_Reg &
             i_MemWrite & i_ALUSrc) when '0',            -- updates the register as usual
         (others => '0') when others;  -- all other possibilities (compiler complains otherwise)
@@ -73,6 +75,7 @@ begin
     reg: register_Nbit
         port map (i_Clock, i_Reset, s_WD, s_stall_reg, s_RD);
 
+    o_Instruction <= s_RD(207 downto 176);
     o_MemRead <= s_RD(175);
     o_PCPlus4 <= s_RD(174 downto 143);
     o_JAL <= s_RD(142);

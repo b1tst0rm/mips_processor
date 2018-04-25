@@ -9,7 +9,7 @@
 -- Enter this command while simulating to load intruction memory (example .hex shown):
 -- mem load -infile {filename}.hex -format hex /mips_pipeline_hazards/stage1/instruc_mem/ram
 
--- TODO: For the rest of the TODO signals, simply pass the instruction single along.
+-- TODO: Add the MUXes by ALU
 
 library IEEE;
 use IEEE.std_logic_1164.all;
@@ -60,6 +60,7 @@ architecture structure of mips_pipeline_hazards is
               i_WriteReg         : in std_logic_vector(4 downto 0);
               i_RegWriteEn       : in std_logic;
               i_JAL_WB           : in std_logic;
+              o_Instruction      : out std_logic_vector(31 downto 0);
               o_FLUSH_IFID       : out std_logic;
               o_FLUSH_IDEX       : out std_logic;
               o_STALL_IFID       : out std_logic;
@@ -104,6 +105,8 @@ architecture structure of mips_pipeline_hazards is
               i_Mem_To_Reg  : in std_logic;
               i_MemWrite    : in std_logic;
               i_ALUSrc      : in std_logic;
+              i_Instruction : in std_logic_vector(31 downto 0);
+              o_Instruction : out std_logic_vector(31 downto 0);
               o_MemRead     : out std_logic;
               o_PCPlus4     : out std_logic_vector(31 downto 0);
               o_JAL         : out std_logic;
@@ -121,44 +124,50 @@ architecture structure of mips_pipeline_hazards is
     end component;
 
     component execution is
-        port( i_Reset            : in std_logic;
-              i_Clock            : in std_logic;
-              i_Branch           : in std_logic;
-              i_JR               : in std_logic;
-              i_MemRead          : in std_logic;
-              i_EXMEM_RegWriteEn : in std_logic;
-              i_MEMWB_RegWriteEn : in std_logic;
-              i_EXMEM_WriteReg   : in std_logic_vector(4 downto 0);
-              i_MEMWB_WriteReg   : in std_logic_vector(4 downto 0);
-              i_IFID_RS          : in std_logic_vector(4 downto 0);
-              i_IDEX_RS          : in std_logic_vector(4 downto 0);
-              i_IFID_RT          : in std_logic_vector(4 downto 0);
-              i_IDEX_RT          : in std_logic_vector(4 downto 0);
-              i_EXMEM_RT         : in std_logic_vector(4 downto 0);
-              i_PCPlus4          : in std_logic_vector(31 downto 0);
-              i_JAL              : in std_logic;
-              i_RD1              : in std_logic_vector(31 downto 0);
-              i_RD2              : in std_logic_vector(31 downto 0);
-              i_IMM              : in std_logic_vector(31 downto 0);
-              i_SHAMT            : in std_Logic_vector(31 downto 0);
-              i_WR               : in std_logic_vector(4 downto 0);
-              i_RegWriteEn       : in std_logic;
-              i_ALUOP            : in std_logic_vector(3 downto 0);
-              i_Sel_Mux2         : in std_logic;
-              i_Mem_To_Reg       : in std_logic;
-              i_MemWrite         : in std_logic;
-              i_ALUSrc           : in std_logic;
-              o_PCPlus4          : out std_logic_vector(31 downto 0);
-              o_JAL              : out std_logic;
-              o_ALUOut           : out std_logic_vector(31 downto 0);
-              o_RD2              : out std_logic_vector(31 downto 0);
-              o_WR               : out std_logic_vector(4 downto 0);
-              o_Mem_To_Reg       : out std_logic;
-              o_MemWrite         : out std_logic;
-              o_RegWriteEn       : out std_logic;
-              o_OVF              : out std_logic;
-              o_ZF               : out std_logic;
-              o_CF               : out std_logic );
+        port( i_Reset              : in std_logic;
+              i_Clock              : in std_logic;
+              i_Branch             : in std_logic;
+              i_JR                 : in std_logic;
+              i_MemRead            : in std_logic;
+              i_EXMEM_RegWriteEn   : in std_logic;
+              i_MEMWB_RegWriteEn   : in std_logic;
+              i_EXMEM_WriteReg     : in std_logic_vector(4 downto 0);
+              i_MEMWB_WriteReg     : in std_logic_vector(4 downto 0);
+              i_IFID_RS            : in std_logic_vector(4 downto 0);
+              i_IDEX_RS            : in std_logic_vector(4 downto 0);
+              i_IFID_RT            : in std_logic_vector(4 downto 0);
+              i_IDEX_RT            : in std_logic_vector(4 downto 0);
+              i_EXMEM_RT           : in std_logic_vector(4 downto 0);
+              i_PCPlus4            : in std_logic_vector(31 downto 0);
+              i_JAL                : in std_logic;
+              i_RD1                : in std_logic_vector(31 downto 0);
+              i_RD2                : in std_logic_vector(31 downto 0);
+              i_IMM                : in std_logic_vector(31 downto 0);
+              i_SHAMT              : in std_Logic_vector(31 downto 0);
+              i_WR                 : in std_logic_vector(4 downto 0);
+              i_RegWriteEn         : in std_logic;
+              i_ALUOP              : in std_logic_vector(3 downto 0);
+              i_Sel_Mux2           : in std_logic;
+              i_Mem_To_Reg         : in std_logic;
+              i_MemWrite           : in std_logic;
+              i_ALUSrc             : in std_logic;
+              i_Instruction        : in std_logic_vector(31 downto 0);
+              o_Instruction        : out std_logic_vector(31 downto 0);
+              o_PCPlus4            : out std_logic_vector(31 downto 0);
+              o_JAL                : out std_logic;
+              o_ALUOut             : out std_logic_vector(31 downto 0);
+              o_RD2                : out std_logic_vector(31 downto 0);
+              o_WR                 : out std_logic_vector(4 downto 0);
+              o_Mem_To_Reg         : out std_logic;
+              o_MemWrite           : out std_logic;
+              o_RegWriteEn         : out std_logic;
+              o_OVF                : out std_logic;
+              o_ZF                 : out std_logic;
+              o_CF                 : out std_logic;
+              o_Forward_RS_Sel1    : out std_logic;
+              o_Forward_RS_Sel2    : out std_logic;
+              o_Forward_RT_Sel1    : out std_logic;
+              o_Forward_RT_Sel2    : out std_logic );
     end component;
 
     component register_EX_MEM is
@@ -174,6 +183,8 @@ architecture structure of mips_pipeline_hazards is
               i_Mem_To_Reg  : in std_logic;
               i_MemWrite    : in std_logic;
               i_RegWriteEn  : in std_logic;
+              i_Instruction : in std_logic_vector(31 downto 0);
+              o_Instruction : out std_logic_vector(31 downto 0);
               o_PCPlus4     : out std_logic_vector(31 downto 0);
               o_JAL         : out std_logic;
               o_ALUOut      : out std_logic_vector(31 downto 0);
@@ -261,7 +272,7 @@ architecture structure of mips_pipeline_hazards is
     -- Stage 2
     signal s_WriteData_IDEX_In, s_PCPlus4_IDEX_In : std_logic_vector(31 downto 0);
     signal s_WR_IDEX_In    : std_logic_vector(4 downto 0); -- see above
-    signal s_RD1_IDEX_In, s_RD2_IDEX_In, s_Immediate_IDEX_In, s_SHAMT_IDEX_In : std_logic_vector(31 downto 0);
+    signal s_RD1_IDEX_In, s_RD2_IDEX_In, s_Immediate_IDEX_In, s_SHAMT_IDEX_In, s_Instruc_IDEX_In : std_logic_vector(31 downto 0);
     signal s_ALUOP_IDEX_In : std_logic_vector(3 downto 0);
     signal s_Sel_Mux2_IDEX_In, s_Mem_To_Reg_IDEX_In, s_MemWrite_IDEX_In,
            s_ALUSrc_IDEX_In, s_RegWriteEn_IDEX_In, s_JAL_IDEX_In,
@@ -269,7 +280,7 @@ architecture structure of mips_pipeline_hazards is
     -- End Stage 2 Intermediary Signals
 
     -- Reg 2/3
-    signal s_RD1_IDEX_Out, s_RD2_IDEX_Out, s_Immediate_IDEX_Out, s_SHAMT_IDEX_Out, s_PCPlus4_IDEX_Out : std_logic_vector(31 downto 0);
+    signal s_RD1_IDEX_Out, s_RD2_IDEX_Out, s_Immediate_IDEX_Out, s_SHAMT_IDEX_Out, s_PCPlus4_IDEX_Out, s_Instruc_IDEX_Out : std_logic_vector(31 downto 0);
     signal s_WR_IDEX_Out : std_logic_vector(4 downto 0);
     signal s_ALUOP_IDEX_Out : std_logic_vector(3 downto 0);
     signal s_RegWriteEn_IDEX_Out, s_Sel_Mux2_IDEX_Out, s_Mem_To_Reg_IDEX_Out,
@@ -277,13 +288,14 @@ architecture structure of mips_pipeline_hazards is
     -- End Reg 2/3
 
     -- Stage 3
-    signal s_ALUOut_EXMEM_In, s_RD2_EXMEM_In, s_PCPlus4_EXMEM_In : std_logic_vector(31 downto 0);
+    signal s_ALUOut_EXMEM_In, s_RD2_EXMEM_In, s_PCPlus4_EXMEM_In, s_Instruc_EXMEM_In : std_logic_vector(31 downto 0);
     signal s_WR_EXMEM_In : std_logic_vector(4 downto 0);
-    signal s_Mem_To_Reg_EXMEM_In, s_MemWrite_EXMEM_In       , s_RegWriteEn_EXMEM_In, s_JAL_EXMEM_In : std_logic;
+    signal s_Mem_To_Reg_EXMEM_In, s_MemWrite_EXMEM_In, s_RegWriteEn_EXMEM_In, s_JAL_EXMEM_In,
+           s_Forward_RS_Sel1, s_Forward_RS_Sel2, s_Forward_RT_Sel1, s_Forward_RT_Sel2 : std_logic;
     -- End Stage 3 Intermediary Signals
 
     -- Reg 3/4
-    signal s_ALUOut_EXMEM_Out, s_RD2_EXMEM_Out, s_PCPlus4_EXMEM_Out : std_logic_vector(31 downto 0);
+    signal s_ALUOut_EXMEM_Out, s_RD2_EXMEM_Out, s_PCPlus4_EXMEM_Out, s_Instruc_EXMEM_Out : std_logic_vector(31 downto 0);
     signal s_WR_EXMEM_Out : std_logic_vector(4 downto 0);
     signal s_Mem_To_Reg_EXMEM_Out, s_MemWrite_EXMEM_Out, s_RegWriteEn_EXMEM_Out, s_JAL_EXMEM_Out : std_logic;
     -- End Reg 3/4
@@ -345,13 +357,14 @@ begin
                 i_EXMEM_WriteReg   => s_WR_EXMEM_Out,
                 i_IFID_RS          => s_Instruc_IFID_Out(25 downto 21),
                 i_IFID_RT          => s_Instruc_IFID_Out(20 downto 16),
-                i_IDEX_RT          => TODO,
+                i_IDEX_RT          => s_Instruc_IDEX_Out(20 downto 16),
                 i_Instruction      => s_Instruc_IFID_Out,
                 i_PCPlus4          => s_PCPlus4_IFID_Out,
                 i_WriteData        => s_WriteData_WB_Out,
                 i_WriteReg         => s_WriteReg_WB_Out,
                 i_RegWriteEn       => s_RegWriteEn_WB_Out,
                 i_JAL_WB           => s_JAL_WB_Out,
+                o_Instruction      => s_Instruc_IDEX_In,
                 o_FLUSH_IFID       => s_FLUSH_IFID,
                 o_FLUSH_IDEX       => s_FLUSH_IDEX,
                 o_STALL_IFID       => s_STALL_IFID,
@@ -396,7 +409,9 @@ begin
                  i_Sel_Mux2    => s_Sel_Mux2_IDEX_In,
                  i_Mem_To_Reg  => s_Mem_To_Reg_IDEX_In,
                  i_MemWrite    => s_MemWrite_IDEX_In,
+                 i_Instruction => s_Instruc_IDEX_In,
                  i_ALUSrc      => s_ALUSrc_IDEX_In,
+                 o_Instruction => s_Instruc_IDEX_Out,
                  o_MemRead     => s_MemRead_IDEX_Out,
                  o_PCPlus4     => s_PCPlus4_IDEX_Out,
                  o_JAL         => s_JAL_IDEX_Out,
@@ -415,44 +430,50 @@ begin
 
 -------------------------------- EX Stage 3 ------------------------------------
     stage3: execution
-       port map(i_Reset            => i_Reset,
-                i_Clock            => i_Clock,
-                i_Branch           => s_Branch_Stage2,
-                i_JR               => s_JR_Origin,
-                i_MemRead          => s_MemRead_IDEX_Out,
-                i_EXMEM_RegWriteEn => s_RegWriteEn_EXMEM_Out,
-                i_MEMWB_RegWriteEn => s_RegWriteEn_MEMWB_Out,
-                i_EXMEM_WriteReg   => s_WR_EXMEM_Out,
-                i_MEMWB_WriteReg   => s_WR_MEMWB_Out,
-                i_IFID_RS          => s_Instruc_IFID_Out(25 downto 21),
-                i_IDEX_RS          => TODO,
-                i_IFID_RT          => s_Instruc_IFID_Out(20 downto 16),
-                i_IDEX_RT          => TODO,
-                i_EXMEM_RT         => TODO,
-                i_PCPlus4          => s_PCPlus4_IDEX_Out,
-                i_JAL              => s_JAL_IDEX_Out,
-                i_RD1              => s_RD1_IDEX_Out,
-                i_RD2              => s_RD2_IDEX_Out,
-                i_IMM              => s_Immediate_IDEX_Out,
-                i_SHAMT            => s_SHAMT_IDEX_Out,
-                i_WR               => s_WR_IDEX_Out,
-                i_RegWriteEn       => s_RegWriteEn_IDEX_Out,
-                i_ALUOP            => s_ALUOP_IDEX_Out,
-                i_Sel_Mux2         => s_Sel_Mux2_IDEX_Out,
-                i_Mem_To_Reg       => s_Mem_To_Reg_IDEX_Out,
-                i_MemWrite         => s_MemWrite_IDEX_Out,
-                i_ALUSrc           => s_ALUSrc_IDEX_Out,
-                o_PCPlus4          => s_PCPlus4_EXMEM_In,
-                o_JAL              => s_JAL_EXMEM_In,
-                o_ALUOut           => s_ALUOut_EXMEM_In,
-                o_RD2              => s_RD2_EXMEM_In,
-                o_WR               => s_WR_EXMEM_In,
-                o_Mem_To_Reg       => s_Mem_To_Reg_EXMEM_In,
-                o_MemWrite         => s_MemWrite_EXMEM_In,
-                o_RegWriteEn       => s_RegWriteEn_EXMEM_In,
-                o_OVF              => s_OVF,
-                o_ZF               => s_ZF,
-                o_CF               => s_CF );
+       port map(i_Reset              => i_Reset,
+                i_Clock              => i_Clock,
+                i_Branch             => s_Branch_Stage2,
+                i_JR                 => s_JR_Origin,
+                i_MemRead            => s_MemRead_IDEX_Out,
+                i_EXMEM_RegWriteEn   => s_RegWriteEn_EXMEM_Out,
+                i_MEMWB_RegWriteEn   => s_RegWriteEn_MEMWB_Out,
+                i_EXMEM_WriteReg     => s_WR_EXMEM_Out,
+                i_MEMWB_WriteReg     => s_WR_MEMWB_Out,
+                i_IFID_RS            => s_Instruc_IFID_Out(25 downto 21),
+                i_IDEX_RS            => s_Instruc_IDEX_Out(25 downto 21),
+                i_IFID_RT            => s_Instruc_IFID_Out(20 downto 16),
+                i_IDEX_RT            => s_Instruc_IDEX_Out(20 downto 16),
+                i_EXMEM_RT           => s_Instruc_EXMEM_Out(20 downto 16),
+                i_PCPlus4            => s_PCPlus4_IDEX_Out,
+                i_JAL                => s_JAL_IDEX_Out,
+                i_RD1                => s_RD1_IDEX_Out,
+                i_RD2                => s_RD2_IDEX_Out,
+                i_IMM                => s_Immediate_IDEX_Out,
+                i_SHAMT              => s_SHAMT_IDEX_Out,
+                i_WR                 => s_WR_IDEX_Out,
+                i_RegWriteEn         => s_RegWriteEn_IDEX_Out,
+                i_ALUOP              => s_ALUOP_IDEX_Out,
+                i_Sel_Mux2           => s_Sel_Mux2_IDEX_Out,
+                i_Mem_To_Reg         => s_Mem_To_Reg_IDEX_Out,
+                i_MemWrite           => s_MemWrite_IDEX_Out,
+                i_ALUSrc             => s_ALUSrc_IDEX_Out,
+                i_Instruction        => s_Instruc_IDEX_Out,
+                o_Instruction        => s_Instruc_EXMEM_In,
+                o_PCPlus4            => s_PCPlus4_EXMEM_In,
+                o_JAL                => s_JAL_EXMEM_In,
+                o_ALUOut             => s_ALUOut_EXMEM_In,
+                o_RD2                => s_RD2_EXMEM_In,
+                o_WR                 => s_WR_EXMEM_In,
+                o_Mem_To_Reg         => s_Mem_To_Reg_EXMEM_In,
+                o_MemWrite           => s_MemWrite_EXMEM_In,
+                o_RegWriteEn         => s_RegWriteEn_EXMEM_In,
+                o_OVF                => s_OVF,
+                o_ZF                 => s_ZF,
+                o_CF                 => s_CF,
+                o_Forward_RS_Sel1    => s_Forward_RS_Sel1,
+                o_Forward_RS_Sel2    => s_Forward_RS_Sel2,
+                o_Forward_RT_Sel1    => s_Forward_RT_Sel1,
+                o_Forward_RT_Sel2    => s_Forward_RT_Sel2 );
 -------------------------------- End EX Stage 3 --------------------------------
 
 ------------------------------ EX/MEM Register ---------------------------------
@@ -469,6 +490,8 @@ begin
                i_Mem_To_Reg  => s_Mem_To_Reg_EXMEM_In,
                i_MemWrite    => s_MemWrite_EXMEM_In,
                i_RegWriteEn  => s_RegWriteEn_EXMEM_In,
+               i_Instruction => s_Instruc_EXMEM_In,
+               o_Instruction => s_Instruc_EXMEM_Out,
                o_PCPlus4     => s_PCPlus4_EXMEM_Out,
                o_JAL         => s_JAL_EXMEM_Out,
                o_ALUOut      => s_ALUOut_EXMEM_Out,
