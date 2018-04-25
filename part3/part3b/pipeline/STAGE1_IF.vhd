@@ -25,7 +25,7 @@ entity instruction_fetch is
 end instruction_fetch;
 
 architecture structural of instruction_fetch is
-    component register_32bit is
+    component register_32bit_hazards is
         port( i_CLK  : in std_logic;
               i_RST  : in std_logic;
               i_WD   : in std_logic_vector(31 downto 0);
@@ -76,7 +76,7 @@ begin
     mux: mux2to1_32bit
         port map (s_AddPC4_Out, i_BranchJ_Addr, i_Mux_Sel, s_Mux_Out);
 
-    pc: register_32bit
+    pc: register_32bit_hazards
         port map (i_Clock, i_Reset, s_Mux_Out, s_stall_reg, s_PC_Out);
 
     instruc_mem: mem

@@ -9,8 +9,6 @@
 -- Enter this command while simulating to load intruction memory (example .hex shown):
 -- mem load -infile {filename}.hex -format hex /mips_pipeline_hazards/stage1/instruc_mem/ram
 
--- TODO: Add the MUXes by ALU
-
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
@@ -45,9 +43,15 @@ architecture structure of mips_pipeline_hazards is
               o_PCPlus4     : out std_logic_vector(31 downto 0) );
     end component;
 
-    component instruction_decode is
+    component instruction_decode
         port( i_Reset            : in std_logic;
               i_Clock            : in std_logic;
+              i_Forward_RS_Sel1  : in std_logic;
+              i_Forward_RS_Sel2  : in std_logic;
+              i_Forward_RT_Sel1  : in std_logic;
+              i_Forward_RT_Sel2  : in std_logic;
+              i_WB_Data          : in std_logic_vector(31 downto 0);
+              i_EXMEM_ALUOut     : in std_logic_vector(31 downto 0);
               i_IDEX_MemRead     : in std_logic;
               i_IDEX_WriteReg    : in std_logic_vector(4 downto 0);
               i_EXMEM_WriteReg   : in std_logic_vector(4 downto 0);
@@ -126,6 +130,8 @@ architecture structure of mips_pipeline_hazards is
     component execution is
         port( i_Reset              : in std_logic;
               i_Clock              : in std_logic;
+              i_WB_Data            : in std_logic_vector(31 downto 0);
+              i_EXMEM_ALUOut       : in std_logic_vector(31 downto 0);
               i_Branch             : in std_logic;
               i_JR                 : in std_logic;
               i_MemRead            : in std_logic;
@@ -352,6 +358,12 @@ begin
     stage2: instruction_decode
       port map (i_Reset            => i_Reset,
                 i_Clock            => i_Clock,
+                i_Forward_RS_Sel1  => s_Forward_RS_Sel1,
+                i_Forward_RS_Sel2  => s_Forward_RS_Sel2,
+                i_Forward_RT_Sel1  => s_Forward_RT_Sel1,
+                i_Forward_RT_Sel2  => s_Forward_RT_Sel2,
+                i_WB_Data          => s_WriteData_WB_Out,
+                i_EXMEM_ALUOut     => s_ALUOut_EXMEM_Out,
                 i_IDEX_MemRead     => s_MemRead_IDEX_Out,
                 i_IDEX_WriteReg    => s_WR_IDEX_Out,
                 i_EXMEM_WriteReg   => s_WR_EXMEM_Out,
@@ -432,6 +444,8 @@ begin
     stage3: execution
        port map(i_Reset              => i_Reset,
                 i_Clock              => i_Clock,
+                i_WB_Data            => s_WriteData_WB_Out,
+                i_EXMEM_ALUOut       => s_ALUOut_EXMEM_Out,
                 i_Branch             => s_Branch_Stage2,
                 i_JR                 => s_JR_Origin,
                 i_MemRead            => s_MemRead_IDEX_Out,
