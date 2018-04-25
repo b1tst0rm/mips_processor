@@ -47,6 +47,7 @@ entity instruction_decode is
           o_ALUSrc           : out std_logic;
           o_BranchTaken      : out std_logic; -- to be hooked up to hazard/forwarding
           o_Branch           : out std_logic; -- to be hooked up to hazard/forwarding
+          o_JR               : out std_logic; -- to be immediately sent to forwarding in EX stage
           o_MemRead          : out std_logic ); -- to be sent thru idex
 end instruction_decode;
 
@@ -58,19 +59,19 @@ architecture structural of instruction_decode is
               i_JAL              : in std_logic;
               i_JR               : in std_logic;
               i_Zero_Flag        : in std_logic;
-              i_Instruc_25to0    : in std_logic_vector(25 downto 0); -- the current instruction
-              i_RD1              : in std_logic_vector(31 downto 0); -- for JR
+              i_Instruc_25to0    : in std_logic_vector(25 downto 0);
+              i_RD1              : in std_logic_vector(31 downto 0);
               i_PCPlus4          : in std_logic_vector(31 downto 0);
-              i_IMM              : in std_logic_vector(31 downto 0); -- Instruction(25 downto 0) sign-extended
+              i_IMM              : in std_logic_vector(31 downto 0);
               o_BJ_Address       : out std_logic_vector(31 downto 0);
               o_PCSrc            : out std_logic;
-              o_BranchTaken      : out std_logic; -- 1 when branch (beq or bne) is taken, 0 if not taken
-              o_Branch           : out std_logic );  -- 1 if the instruction is currently beq OR bne
+              o_BranchTaken      : out std_logic;
+              o_Branch           : out std_logic );
     end component;
 
     component control is
         port( i_Instruction    : in std_logic_vector(31 downto 0);
-              o_Sel_ALU_A_Mux2 : out std_logic; -- set to 1 if ALUOP = 1001, 1000, or 1010
+              o_Sel_ALU_A_Mux2 : out std_logic;
               o_RegDst         : out std_logic;
               o_Mem_To_Reg     : out std_logic;
               o_ALUOP		   : out std_logic_vector(3 downto 0);
@@ -82,7 +83,7 @@ architecture structural of instruction_decode is
               o_J              : out std_logic;
               o_JAL            : out std_logic;
               o_JR             : out std_logic;
-              o_MemRead        : out std_logic ); -- set to 1 if a load instruction (which will read the memory) and 0 otherwise
+              o_MemRead        : out std_logic );
     end component;
 
     component register_file is
@@ -105,9 +106,9 @@ architecture structural of instruction_decode is
     end component;
 
     component extend_16to32bit is
-        port( i_input	: in std_logic_vector(15 downto 0);    -- 16 bit input
-              i_sign    : in std_logic;                        -- 0 for unsigned, 1 for signed
-              o_output  : out std_logic_vector(31 downto 0) ); -- 32 bit extended o_output
+        port( i_input	: in std_logic_vector(15 downto 0);
+              i_sign    : in std_logic;
+              o_output  : out std_logic_vector(31 downto 0) );
     end component;
 
     component extend_5to32bit is
@@ -172,6 +173,7 @@ begin
     o_ALUSrc <= s_ALUSrc;
     o_BranchTaken <= s_BranchTaken;
     o_Branch <= s_Branch;
+    o_JR <= s_JR;
     o_MemRead <= s_MemRead;
 
     s_ThirtyOne <= (others => '1'); -- hardcoded to 31 in binary
