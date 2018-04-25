@@ -9,6 +9,8 @@
 -- Enter this command while simulating to load intruction memory (example .hex shown):
 -- mem load -infile {filename}.hex -format hex /mips_pipeline_hazards/stage1/instruc_mem/ram
 
+-- TODO: For the rest of the TODO signals, simply pass the instruction single along.
+
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
@@ -244,7 +246,8 @@ architecture structure of mips_pipeline_hazards is
     signal s_OVF, s_ZF, s_CF : std_logic;
 
     -- FORWARDING/HAZARD --
-    signal s_FLUSH_IDEX : std_logic;
+    signal s_FLUSH_IDEX, s_FLUSH_EXMEM, s_FLUSH_IFID, s_FLUSH_MEMWB : std_logic := '0';
+    signal s_STALL_IDEX, s_STALL_EXMEM, s_STALL_IFID, s_STALL_MEMWB, s_STALL_PC : std_logic := '0';
 
     -- Stage 1
     signal s_branch_j_addr, s_Instruc_IFID_In, s_PCPlus4_IFID_In : std_logic_vector(31 downto 0);
@@ -314,7 +317,7 @@ begin
     stage1: instruction_fetch
       port map ( i_Reset         => i_Reset,
                  i_Clock         => i_Clock,
-                 i_Stall_PC      => TODO,
+                 i_Stall_PC      => s_STALL_PC,
                  i_BranchJ_Addr  => s_branch_j_addr,
                  i_Mux_Sel       => s_fetch_sel,
                  o_Instruction   => s_Instruc_IFID_In,
@@ -325,8 +328,8 @@ begin
     reg_1_2: register_IF_ID
       port map (i_Reset       => i_Reset,
                 i_Clock       => i_Clock,
-                i_Flush       => TODO,
-                i_Stall       => TODO,
+                i_Flush       => s_FLUSH_IFID,
+                i_Stall       => s_STALL_IFID,
                 i_Instruction => s_Instruc_IFID_In,
                 i_PCPlus4     => s_PCPlus4_IFID_In,
                 o_Instruction => s_Instruc_IFID_Out,
@@ -337,11 +340,11 @@ begin
     stage2: instruction_decode
       port map (i_Reset            => i_Reset,
                 i_Clock            => i_Clock,
-                i_IDEX_MemRead     => TODO,
-                i_IDEX_WriteReg    => TODO,
-                i_EXMEM_WriteReg   => TODO,
-                i_IFID_RS          => TODO,
-                i_IFID_RT          => TODO,
+                i_IDEX_MemRead     => s_MemRead_IDEX_Out,
+                i_IDEX_WriteReg    => s_WR_IDEX_Out,
+                i_EXMEM_WriteReg   => s_WR_EXMEM_Out,
+                i_IFID_RS          => s_Instruc_IFID_Out(25 downto 21),
+                i_IFID_RT          => s_Instruc_IFID_Out(20 downto 16),
                 i_IDEX_RT          => TODO,
                 i_Instruction      => s_Instruc_IFID_Out,
                 i_PCPlus4          => s_PCPlus4_IFID_Out,
@@ -349,15 +352,15 @@ begin
                 i_WriteReg         => s_WriteReg_WB_Out,
                 i_RegWriteEn       => s_RegWriteEn_WB_Out,
                 i_JAL_WB           => s_JAL_WB_Out,
-                o_FLUSH_IFID       => TODO,
-                o_FLUSH_IDEX       => TODO,
-                o_STALL_IFID       => TODO,
-                o_STALL_PC         => TODO,
+                o_FLUSH_IFID       => s_FLUSH_IFID,
+                o_FLUSH_IDEX       => s_FLUSH_IDEX,
+                o_STALL_IFID       => s_STALL_IFID,
+                o_STALL_PC         => s_STALL_PC,
                 o_PCPlus4          => s_PCPlus4_IDEX_In,
                 o_JAL              => s_JAL_IDEX_In,
                 o_SHAMT            => s_SHAMT_IDEX_In,
                 o_BJ_Address       => s_branch_j_addr,
-                o_PCSrc            => s_fetch_sel, -- TODO: Could this be named more appropriately?
+                o_PCSrc            => s_fetch_sel,
                 o_Immediate        => s_Immediate_IDEX_In,
                 o_WR               => s_WR_IDEX_In,
                 o_RegWriteEn       => s_RegWriteEn_IDEX_In,
@@ -379,7 +382,7 @@ begin
         port map(i_Reset       => i_Reset,
                  i_Clock       => i_Clock,
                  i_Flush       => s_FLUSH_IDEX,
-                 i_Stall       => TODO,
+                 i_Stall       => s_STALL_IDEX,
                  i_MemRead     => s_MemRead_IDEX_In,
                  i_PCPlus4     => s_PCPlus4_EXMEM_In,
                  i_JAL         => s_JAL_IDEX_In,
@@ -414,16 +417,16 @@ begin
     stage3: execution
        port map(i_Reset            => i_Reset,
                 i_Clock            => i_Clock,
-                i_Branch           => TODO,
+                i_Branch           => s_Branch_Stage2,
                 i_JR               => s_JR_Origin,
-                i_MemRead          => TODO,
-                i_EXMEM_RegWriteEn => TODO,
-                i_MEMWB_RegWriteEn => TODO,
-                i_EXMEM_WriteReg   => TODO,
-                i_MEMWB_WriteReg   => TODO,
-                i_IFID_RS          => TODO,
+                i_MemRead          => s_MemRead_IDEX_Out,
+                i_EXMEM_RegWriteEn => s_RegWriteEn_EXMEM_Out,
+                i_MEMWB_RegWriteEn => s_RegWriteEn_MEMWB_Out,
+                i_EXMEM_WriteReg   => s_WR_EXMEM_Out,
+                i_MEMWB_WriteReg   => s_WR_MEMWB_Out,
+                i_IFID_RS          => s_Instruc_IFID_Out(25 downto 21),
                 i_IDEX_RS          => TODO,
-                i_IFID_RT          => TODO,
+                i_IFID_RT          => s_Instruc_IFID_Out(20 downto 16),
                 i_IDEX_RT          => TODO,
                 i_EXMEM_RT         => TODO,
                 i_PCPlus4          => s_PCPlus4_IDEX_Out,
@@ -456,8 +459,8 @@ begin
     reg_3_4: register_EX_MEM
       port map(i_Reset       => i_Reset,
                i_Clock       => i_Clock,
-               i_Flush       => TODO,
-               i_Stall       => TODO,
+               i_Flush       => s_FLUSH_EXMEM,
+               i_Stall       => s_STALL_EXMEM,
                i_PCPlus4     => s_PCPlus4_EXMEM_In,
                i_JAL         => s_JAL_EXMEM_In,
                i_ALUOut      => s_ALUOut_EXMEM_In,
@@ -501,8 +504,8 @@ begin
     reg_4_5: register_MEM_WB
        port map(i_Reset       => i_Reset,
                 i_Clock       => i_Clock,
-                i_Flush       => TODO,
-                i_Stall       => TODO,
+                i_Flush       => s_FLUSH_MEMWB,
+                i_Stall       => s_STALL_MEMWB,
                 i_PCPlus4     => s_PCPlus4_MEMWB_In,
                 i_JAL         => s_JAL_MEMWB_In,
                 i_ALUOut      => s_ALUOut_MEMWB_In,
