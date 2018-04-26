@@ -9,6 +9,8 @@
 -- Enter this command while simulating to load intruction memory (example .hex shown):
 -- mem load -infile {filename}.hex -format hex /mips_pipeline_hazards/stage1/instruc_mem/ram
 
+-- mem load -infile ../../part2/part2_7/mergesort/mergesort.hex -format hex /mips_pipeline_hazards/stage1/instruc_mem/ram
+
 library IEEE;
 use IEEE.std_logic_1164.all;
 use IEEE.numeric_std.all;
@@ -276,9 +278,8 @@ architecture structure of mips_pipeline_hazards is
     -- End Reg 1/2
 
     -- Stage 2
-    signal s_WriteData_IDEX_In, s_PCPlus4_IDEX_In : std_logic_vector(31 downto 0);
     signal s_WR_IDEX_In    : std_logic_vector(4 downto 0); -- see above
-    signal s_RD1_IDEX_In, s_RD2_IDEX_In, s_Immediate_IDEX_In, s_SHAMT_IDEX_In, s_Instruc_IDEX_In : std_logic_vector(31 downto 0);
+    signal s_PCPlus4_IDEX_In, s_RD1_IDEX_In, s_RD2_IDEX_In, s_Immediate_IDEX_In, s_SHAMT_IDEX_In, s_Instruc_IDEX_In : std_logic_vector(31 downto 0);
     signal s_ALUOP_IDEX_In : std_logic_vector(3 downto 0);
     signal s_Sel_Mux2_IDEX_In, s_Mem_To_Reg_IDEX_In, s_MemWrite_IDEX_In,
            s_ALUSrc_IDEX_In, s_RegWriteEn_IDEX_In, s_JAL_IDEX_In,

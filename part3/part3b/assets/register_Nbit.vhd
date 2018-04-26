@@ -19,18 +19,25 @@ end register_Nbit;
 
 architecture structure of register_Nbit is
     component dff_1bit
-        port( i_CLK        : in std_logic;     -- Clock input
-              i_RST        : in std_logic;     -- Reset input
-              i_WE         : in std_logic;     -- Write enable input
-              i_D          : in std_logic;     -- Data value input
-              o_Q          : out std_logic );  -- Data value output
+        port( i_CLK        : in std_logic;
+              i_RST        : in std_logic;
+              i_WE         : in std_logic;
+              i_D          : in std_logic;
+              o_Q          : out std_logic );
+    end component;
+
+    component mux2to1_1bit is
+        port( i_X   : in std_logic;
+              i_Y   : in std_logic;
+              i_SEL : in std_logic;
+              o_OUT   : out std_logic );
     end component;
 
 begin
 
 GENFOR: for i in 0 to N-1 generate
-    flip_flop: dff_1bit
-        port map (i_CLK, i_RST, i_WE, i_WD(i), o_Q(i));
+flip_flop: dff_1bit
+    port map (i_CLK, i_RST, i_WE, i_WD(i), o_Q(i));
 
 end generate;
 

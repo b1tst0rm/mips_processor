@@ -23,7 +23,7 @@ end register_file;
 
 architecture structure of register_file is
     --- Component Declaration ---
-    component register_32bit_hazards
+    component register_32bit_rf
         port( i_CLK  : in std_logic;
               i_RST  : in std_logic;
               i_WD   : in std_logic_vector(31 downto 0);    -- WD = write data
@@ -94,11 +94,11 @@ generate_registers: for i in 1 to 31 generate -- skip $0 as it will be wired to 
     do_write: and2_1bit
         port map(s_decoded(i), i_REGWRITE, s_write(i)); -- only enable writing if the input WE is enabled
 
-    reg: register_32bit_hazards
+    reg: register_32bit_rf
         port map(i_CLK, i_RST, i_WD, s_write(i), s_register_data(i));
 end generate;
 
-reg_0: register_32bit_hazards   -- Set $0
+reg_0: register_32bit_rf  -- Set $0
     port map(i_CLK, '1', (others => '0'), '0', s_register_data(0)); -- RST = 1 means this will always hold 0
 
 -- Now for the two 32:1 mux mappings for RD1, RD2:

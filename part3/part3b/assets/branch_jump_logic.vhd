@@ -78,8 +78,6 @@ begin
                '0';
 
     o_BranchTaken <= s_AND_Out; -- when the AND_Out value is 1, this means we have branched.
-                                -- TODO: Double check to make sure this ^^^ logic is right.
-
     o_Branch <= s_OR_BEQBNE;
 
     add_IMM: fulladder_32bit
