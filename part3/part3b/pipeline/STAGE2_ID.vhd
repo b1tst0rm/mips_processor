@@ -52,8 +52,7 @@ entity instruction_decode is
           o_Mem_To_Reg       : out std_logic;
           o_MemWrite         : out std_logic;
           o_ALUSrc           : out std_logic;
-          o_BranchTaken      : out std_logic; -- to be hooked up to hazard/forwarding
-          o_Branch           : out std_logic; -- to be hooked up to hazard/forwarding
+          o_Branch           : out std_logic; -- to be hooked up to forwarding
           o_JR               : out std_logic; -- to be immediately sent to forwarding in EX stage
           o_MemRead          : out std_logic ); -- to be sent thru idex
 end instruction_decode;
@@ -132,7 +131,7 @@ architecture structural of instruction_decode is
 
     component hazard_detection is
         port( i_Branch           : in std_logic;
-              i_BranchTaken   : in std_logic;
+              i_BranchTaken      : in std_logic;
               i_J                : in std_logic;
               i_JAL              : in std_logic;
               i_JR               : in std_logic;
@@ -186,7 +185,6 @@ begin
     o_Mem_To_Reg <= s_Mem_To_Reg;
     o_MemWrite <= s_MemWrite;
     o_ALUSrc <= s_ALUSrc;
-    o_BranchTaken <= s_BranchTaken;
     o_Branch <= s_Branch;
     o_JR <= s_JR;
     o_MemRead <= s_MemRead;
@@ -233,7 +231,7 @@ begin
         port map (i_Instruction(10 downto 6), '1', s_SHAMT); -- sign-extend shift amount
 
     rd1_rd2_zero : rd1_rd2_zero_detect
-        port map (s_RD1, s_RD2, s_Zero);
+        port map (s_RS_Data_Final, s_RT_Data_Final, s_Zero); -- TODO: should be RS or RD1?
 
     hazards: hazard_detection
         port map(s_Branch, s_BranchTaken, s_J, s_JAL, s_JR, i_IDEX_MemRead,

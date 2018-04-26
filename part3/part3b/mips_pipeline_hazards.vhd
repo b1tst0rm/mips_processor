@@ -86,7 +86,6 @@ architecture structure of mips_pipeline_hazards is
               o_Mem_To_Reg       : out std_logic;
               o_MemWrite         : out std_logic;
               o_ALUSrc           : out std_logic;
-              o_BranchTaken      : out std_logic;
               o_Branch           : out std_logic;
               o_JR               : out std_logic;
               o_MemRead          : out std_logic );
@@ -265,8 +264,8 @@ architecture structure of mips_pipeline_hazards is
     signal s_OVF, s_ZF, s_CF : std_logic;
 
     -- FORWARDING/HAZARD --
-    signal s_FLUSH_IDEX, s_FLUSH_EXMEM, s_FLUSH_IFID, s_FLUSH_MEMWB : std_logic := '0';
-    signal s_STALL_IDEX, s_STALL_EXMEM, s_STALL_IFID, s_STALL_MEMWB, s_STALL_PC : std_logic := '0';
+    signal s_FLUSH_IDEX, s_FLUSH_IFID : std_logic;
+    signal s_STALL_IFID, s_STALL_PC : std_logic;
 
     -- Stage 1
     signal s_branch_j_addr, s_Instruc_IFID_In, s_PCPlus4_IFID_In : std_logic_vector(31 downto 0);
@@ -283,7 +282,7 @@ architecture structure of mips_pipeline_hazards is
     signal s_ALUOP_IDEX_In : std_logic_vector(3 downto 0);
     signal s_Sel_Mux2_IDEX_In, s_Mem_To_Reg_IDEX_In, s_MemWrite_IDEX_In,
            s_ALUSrc_IDEX_In, s_RegWriteEn_IDEX_In, s_JAL_IDEX_In,
-           s_BranchTaken_Stage2, s_Branch_Stage2, s_MemRead_IDEX_In, s_JR_Origin : std_logic;
+           s_Branch_Stage2, s_MemRead_IDEX_In, s_JR_Origin : std_logic;
     -- End Stage 2 Intermediary Signals
 
     -- Reg 2/3
@@ -397,7 +396,6 @@ begin
                 o_Mem_To_Reg       => s_Mem_To_Reg_IDEX_In,
                 o_MemWrite         => s_MemWrite_IDEX_In,
                 o_ALUSrc           => s_ALUSrc_IDEX_In,
-                o_BranchTaken      => s_BranchTaken_Stage2,
                 o_Branch           => s_Branch_Stage2,
                 o_JR               => s_JR_Origin,
                 o_MemRead          => s_MemRead_IDEX_In );
@@ -408,9 +406,9 @@ begin
         port map(i_Reset       => i_Reset,
                  i_Clock       => i_Clock,
                  i_Flush       => s_FLUSH_IDEX,
-                 i_Stall       => s_STALL_IDEX,
+                 i_Stall       => '0', -- do NOT need to stall this reg @ any time
                  i_MemRead     => s_MemRead_IDEX_In,
-                 i_PCPlus4     => s_PCPlus4_EXMEM_In,
+                 i_PCPlus4     => s_PCPlus4_IDEX_In,
                  i_JAL         => s_JAL_IDEX_In,
                  i_SHAMT       => s_SHAMT_IDEX_In,
                  i_RD1         => s_RD1_IDEX_In,
@@ -495,8 +493,8 @@ begin
     reg_3_4: register_EX_MEM
       port map(i_Reset       => i_Reset,
                i_Clock       => i_Clock,
-               i_Flush       => s_FLUSH_EXMEM,
-               i_Stall       => s_STALL_EXMEM,
+               i_Flush       => '0',      -- We do not have to flush nor stall
+               i_Stall       => '0',      -- this register at any time.
                i_PCPlus4     => s_PCPlus4_EXMEM_In,
                i_JAL         => s_JAL_EXMEM_In,
                i_ALUOut      => s_ALUOut_EXMEM_In,
@@ -542,8 +540,8 @@ begin
     reg_4_5: register_MEM_WB
        port map(i_Reset       => i_Reset,
                 i_Clock       => i_Clock,
-                i_Flush       => s_FLUSH_MEMWB,
-                i_Stall       => s_STALL_MEMWB,
+                i_Flush       => '0',      -- We do not have to flush nor stall
+                i_Stall       => '0',      -- this register at any time.
                 i_PCPlus4     => s_PCPlus4_MEMWB_In,
                 i_JAL         => s_JAL_MEMWB_In,
                 i_ALUOut      => s_ALUOut_MEMWB_In,

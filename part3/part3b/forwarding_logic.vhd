@@ -35,7 +35,7 @@ architecture structural of forwarding_logic is
     -- Intermediary signals that are initialized to 0
     signal s_Forward_ALU_A_Sel1, s_Forward_ALU_A_Sel2, s_Forward_ALU_B_Sel1,
            s_Forward_ALU_B_Sel2, s_Forward_RS_Sel1, s_Forward_RS_Sel2,
-           s_Forward_RT_Sel1, s_Forward_RT_Sel2 : std_logic := '0';
+           s_Forward_RT_Sel1, s_Forward_RT_Sel2 : std_logic;
 
 begin
 
@@ -44,7 +44,18 @@ begin
     process (i_Branch, i_JR, i_EXMEM_RegWriteEn, i_MEMWB_RegWriteEn,
              i_EXMEM_WriteReg, i_MEMWB_WriteReg, i_IFID_RS, i_IDEX_RS, i_IFID_RT,
              i_IDEX_RT, i_EXMEM_RT) -- sensitivity list of inputs
-    begin -- the process of evaluating if the inputs deem forwarding
+    begin -- process of evaluating if the inputs deem forwarding:
+
+        -- Reset all signals each cycle before evaluating and assigning to
+        -- suppress Quartus Prime warnings about default values:
+        s_Forward_ALU_A_Sel1 <= '0';
+        s_Forward_ALU_A_Sel2 <= '0';
+        s_Forward_ALU_B_Sel1 <= '0';
+        s_Forward_ALU_B_Sel2 <= '0';
+        s_Forward_RS_Sel1    <= '0';
+        s_Forward_RS_Sel2    <= '0';
+        s_Forward_RT_Sel1    <= '0';
+        s_Forward_RT_Sel2    <= '0';
 
         -- ALU INPUT A
         if ((i_EXMEM_WriteReg /= "00000") and (i_EXMEM_RegWriteEn = '1') and

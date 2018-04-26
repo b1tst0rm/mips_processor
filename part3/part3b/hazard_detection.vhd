@@ -1,7 +1,7 @@
 -- hazard_detection.vhd
 -------------------------------------------------------------------------
 -- DESCRIPTION: Unit that detects and deals with various hazards in a
--- MIPS pipelined processor.
+-- MIPS pipelined processor. Sits in the ID stage (2).
 --
 -- AUTHOR: Daniel Limanowski
 -------------------------------------------------------------------------
@@ -12,7 +12,7 @@ use IEEE.numeric_std.all;
 
 entity hazard_detection is
     port( i_Branch           : in std_logic; -- this is an OR between BEQ and BNE
-          i_BranchTaken   : in std_logic; -- 0 if branch not taken, 1 if branch taken (ie., beq evaluates to be equal)
+          i_BranchTaken      : in std_logic; -- 0 if branch not taken, 1 if branch taken (ie., beq evaluates to be equal)
           i_J                : in std_logic;
           i_JAL              : in std_logic;
           i_JR               : in std_logic;
@@ -32,9 +32,14 @@ architecture structural of hazard_detection is
 
 begin
 
+
     process (i_Branch, i_BranchTaken, i_J, i_JAL, i_JR, i_IDEX_MemRead,
              i_IDEX_WriteReg, i_EXMEM_WriteReg, i_IFID_RS, i_IFID_RT, i_IDEX_RT)
     begin
+        o_Flush_IFID <= '0';
+        o_Flush_IDEX <= '0';
+        o_Stall_IFID <= '0';
+        o_Stall_PC   <= '0'; -- reset all outputs each cycle to prevent them from being inferred as latches
         if (((i_IFID_RT = i_IDEX_RT) or (i_IDEX_RT = i_IFID_RS)) and (i_IDEX_MemRead = '1')) then
             -- Load-use hazard detected
             o_Flush_IDEX <= '1';
