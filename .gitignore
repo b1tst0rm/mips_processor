@@ -1,9 +1,7 @@
 *.bak
 *.mti
 *.mpf
-*.wlf
 work/
-report/
 db/
 incremental_db/
 output_files/
